@@ -186,7 +186,7 @@ jobs:
         cp ./docs/result/result.txt ./docs/result/result-${logdate}.rst
         # インデックスが重要なためスペース3つ分あけること
         #echo "   result/result-${logdate}.rst" >> ./docs/index.rst
-        sed -i -e "$ a "   result/result-${logdate}.rst"" ./docs/index.rst
+        sed -i -e "$ a "\ \ \ result/result-${logdate}.rst"" ./docs/index.rst
         cat ./docs/index.rst
         # Build
         sphinx-build -E -b singlehtml ./docs/ docs/_build
