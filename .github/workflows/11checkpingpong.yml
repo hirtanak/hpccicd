@@ -192,6 +192,6 @@ jobs:
           git add ./docs/_build/*
           git add ./docs/index.html
           git add ./docs/result/*
-          git add ./docs/*
+          git add ./docs/index.rst
           git commit -m "pingpong: auto rebuilding site"
           git push --set-upstream -f origin HEAD:gh-pages
