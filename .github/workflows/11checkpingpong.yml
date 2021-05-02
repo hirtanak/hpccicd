@@ -152,6 +152,19 @@ jobs:
         name: result.txt
         path: ./docs/result
 
+    - name: Web Site Push - delete
+      env:
+        GITHUB_USER: "hirtanak"
+        GITHUB_EMAIL: "hirtanak@gmail.com"
+        GITHUB_REPOSITORY: ${{ github.repository }}
+      run: |
+          git config --local user.name "${GITHUB_USER}"
+          git config --local user.email "${GITHUB_EMAIL}"
+          git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
+          # index.rst対策
+          git rm -f ./docs/index.rst
+          git commit -m "index.rst delete"
+
     - name: Web Site Build
       run: |
         ls -la ./
@@ -175,7 +188,7 @@ jobs:
           echo "${{ secrets.SSH_SECRET_KEY }}" > ~/.ssh/id_rsa
           chmod 400 ~/.ssh/id_rsa
 
-    - name: Web Site Push
+    - name: Web Site Push - update files
       env:
         GITHUB_USER: "hirtanak"
         GITHUB_EMAIL: "hirtanak@gmail.com"
@@ -184,11 +197,6 @@ jobs:
           git config --local user.name "${GITHUB_USER}"
           git config --local user.email "${GITHUB_EMAIL}"
           git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
-          # index.rst対策
-          git rm -f ./docs/index.rst
-          git commit -m "index.rst delete"
-          git push -f origin HEAD:gh-pages
-          # update files        
           git add ./docs/_build/*
           git add ./docs/index.html
           git add ./docs/result/*
