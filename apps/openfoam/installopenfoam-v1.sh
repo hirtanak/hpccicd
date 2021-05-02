@@ -1,12 +1,8 @@
 #!/bin/bash
-<<<<<<< HEAD
 echo "BUILD: try openfoam build...."
 
 # 引数1：OpenFOAMのバージョン
 OPENFOAM_VERSION=$1
-=======
-echo "add openfoam build...."
->>>>>>> 1f62b87... Update 91creatingissues.yml
 
 MyResourceGroup=tmcbmt01-hpccicd01
 Location=japaneast #southcentralus
@@ -42,7 +38,6 @@ PBSPERMANENTDISK=2048
 #azure_name="uuid"
 #azure_password="uuid"
 #azure_tenant="uuid"
-<<<<<<< HEAD
 az login --service-principal --username ${azure_name} --password ${azure_password} --tenant ${azure_tenant} --output none
 
 # コマンド名取得
@@ -51,37 +46,18 @@ CMDNAME=$(basename $0)
 if [ $# -eq 0 ]; then
 	echo "実行するには1個の引数が必要です。" 1>&2
 	echo "./xxx.sh バージョン" 1>&2
-=======
-
-az login --service-principal --username ${azure_name} --password ${azure_password} --tenant ${azure_tenant} --output none
-
-# デバックオプション
-DEBUG="" #"-v"
-# コマンド名取得
-CMDNAME=$(basename $0)
-# コマンドオプションエラー処理
-if [ $# -eq 1 ]; then
-	echo "実行するには2個の引数が必要です。" 1>&2
-	echo "./xxx.sh バージョン 並列数" 1>&2
->>>>>>> 1f62b87... Update 91creatingissues.yml
 	exit 1
 fi
 # SSH鍵チェック
 SSHKEYDIR="./${VMPREFIX}"
 echo "SSHKEYDIR: $SSHKEYDIR"
 
-<<<<<<< HEAD
 # 必要なパッケージ。Ubuntuの場合、以下のパッケージが必要
 sudo apt-get install -qq -y parallel jq curl
 
 # グローバルIPアドレスの取得・処理
 curl -s https://ifconfig.io > tmpip #利用しているクライアントのグローバルIPアドレスを取得
 echo "$(curl -s https://ipinfo.io/ip)" >> tmpip #代替サイトでグローバルIPアドレスを取得
-=======
-# グローバルIPアドレスの取得・処理
-curl -s https://ifconfig.io > tmpip #利用しているクライアントのグローバルIPアドレスを取得
-echo $(curl -s https://ipinfo.io/ip) >> tmpip #代替サイトでグローバルIPアドレスを取得
->>>>>>> 1f62b87... Update 91creatingissues.yml
 curl -s https://inet-ip.info >> tmpip #代替サイトでグローバルIPアドレスを取得
 sed -i -e '/^$/d' tmpip > /dev/null
 LIMITEDIP="$(cat tmpip | head -n 1)/32"
@@ -90,12 +66,6 @@ echo "current your client global ip address: $LIMITEDIP. This script defines the
 LIMITEDIP2=113.40.3.153/32 #追加制限IPアドレスをCIRDで記載 例：1.1.1.0/24
 echo "addtional accessible CIDR: $LIMITEDIP2"
 
-<<<<<<< HEAD
-=======
-# 必要なパッケージ。Ubuntuの場合、以下のパッケージが必要
-sudo apt-get install -qq -y parallel jq curl
-
->>>>>>> 1f62b87... Update 91creatingissues.yml
 # VM1 IPアドレス取得
 unset vm1ip
 vm1ip=$(az vm show -d -g $MyResourceGroup --name ${VMPREFIX}-1 --query publicIps -o tsv)
@@ -105,11 +75,7 @@ if [ -z "vm1ip" ]; then
 	exit 1
 fi
 
-<<<<<<< HEAD
 # SSHアクセスチェック：VM#1
-=======
-# SSHアクセスチェック
->>>>>>> 1f62b87... Update 91creatingissues.yml
 unset checkssh
 checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i ${SSHKEYDIR} -t $USERNAME@${vm1ip} "uname")
 if [ -z "$checkssh" ]; then

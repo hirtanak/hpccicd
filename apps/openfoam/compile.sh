@@ -20,11 +20,7 @@ if [ ! -z $OPENFOAM_VERSION ]; then
   fi
   if [ -d /mnt/exports/apps/OpenFOAM/OpenFOAM-$OPENFOAM_VERSION/platforms -a -w /mnt/exports/apps/OpenFOAM/OpenFOAM-$OPENFOAM_VERSION/platforms ]; then
     cd /mnt/exports/apps/OpenFOAM/OpenFOAM-$OPENFOAM_VERSION/platforms
-<<<<<<< HEAD
     echo "In compile.sh - LINKDIR : $(pwd)"
-=======
-    echo "In compile.sh - LINKDIR : `pwd`"
->>>>>>> 1f62b87... Update 91creatingissues.yml
     ln -s linux64Gcc4_8_5DPInt32Opt linux64GccDPInt32Opt
   fi
 else
