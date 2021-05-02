@@ -165,7 +165,7 @@ jobs:
         GITHUB_EMAIL: "hirtanak@gmail.com"
         GITHUB_REPOSITORY: ${{ github.repository }}
       run: |
-          wget -q https://raw.githubusercontent.com/hirtanak/hpccicd/gh-pages/docs/index.rst.original -O ./index.rst.tmp
+          wget -q https://raw.githubusercontent.com/hirtanak/hpccicd/gh-pages/docs/index.rst.original -O ./docs/index.rst.tmp
           git config --local user.name "${GITHUB_USER}"
           git config --local user.email "${GITHUB_EMAIL}"
           git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
@@ -179,13 +179,11 @@ jobs:
         ls -la ./
         mkdir -p ./docs ./docs/_build
         ls -la ./docs/
-        #cp ./docs/result/result.txt ./docs/result.rst
-        #cp ./docs/result/result.txt ./docs/result/result.rst
-        cp ./index.rst.tmp ./index.rst
+        cp ./docs/index.rst.tmp ./docs/index.rst
         logdate=$(date "+%Y%m%d_%H%M")
+        ls -la ./docs/result/
         cp ./docs/result/result.txt ./docs/result/result-${logdate}.rst
-        # インデックスが重要なためスペース3つ分あけること
-        #echo "   result/result-${logdate}.rst" >> ./docs/index.rst
+        # インデックスが重要なためスペース3つ分あけること。エコーの利用も問題あり。：echo "   result/result-${logdate}.rst" >> ./docs/index.rst
         sed -i -e "$a "   result\/result-${logdate}.rst"" ./docs/index.rst
         cat ./docs/index.rst
         # Build
@@ -204,7 +202,7 @@ jobs:
           git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
           git add ./docs/_build/*
           git add ./docs/index.html
-          git add ./docs/result/*
           git add ./docs/index.rst
+          git add ./docs/result/*
           git commit -m "pingpong: auto rebuilding site"
           git push -f origin HEAD:gh-pages
