@@ -181,8 +181,8 @@ jobs:
         ls -la ./docs/
         cp ./docs/index.rst.tmp ./docs/index.rst
         logdate=$(date "+%Y%m%d_%H%M")
-        ls -la ./docs/result/
         cp ./docs/result/result.txt ./docs/result/result-${logdate}.rst
+        ls -la ./docs/result/
         # インデックスが重要なためスペース3つ分あけること。エコーの利用も問題あり。：echo "   result/result-${logdate}.rst" >> ./docs/index.rst
         sed -i -e "$a "   result\/result-${logdate}.rst"" ./docs/index.rst
         cat ./docs/index.rst
