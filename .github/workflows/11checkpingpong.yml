@@ -158,6 +158,7 @@ jobs:
         GITHUB_EMAIL: "hirtanak@gmail.com"
         GITHUB_REPOSITORY: ${{ github.repository }}
       run: |
+          wget https://raw.githubusercontent.com/hirtanak/hpccicd/gh-pages/docs/index.rst -O ./index.rst.tmp
           git config --local user.name "${GITHUB_USER}"
           git config --local user.email "${GITHUB_EMAIL}"
           git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
@@ -172,6 +173,7 @@ jobs:
         ls -la ./docs/
         #cp ./docs/result/result.txt ./docs/result.rst
         #cp ./docs/result/result.txt ./docs/result/result.rst
+        cp ./index.rst.tmp ./index.rst
         logdate=$(date "+%Y%m%d_%H%M")
         cp ./docs/result/result.txt ./docs/result/result-${logdate}.rst
         # インデックスが重要なためスペース3つ分あけること
