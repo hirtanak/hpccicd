@@ -1,6 +1,5 @@
 name: 11checkpingpong
 on:
-<<<<<<< HEAD
 #  workflow_run:
 #    workflows: ["01azure_deploy"]
 #    branches: [main]
@@ -10,13 +9,6 @@ on:
     branches: [main]
     paths:
       - senarios/pingpong
-=======
-  workflow_run:
-    workflows: ["01azure_deploy"]
-    branches: [main]
-    types: 
-      - completed
->>>>>>> 1f62b87... Update 91creatingissues.yml
 
 jobs:
 
@@ -24,11 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     # 呼び元のworkflowの結果が success であればジョブを実行
     # 01azure_deployが成功すれば 11checkpingpong を実施する
-<<<<<<< HEAD
     #if: ${{ github.event.workflow_run.conclusion == 'success' }}
-=======
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
->>>>>>> 1f62b87... Update 91creatingissues.yml
     env:
       MyResourceGroup: tmcbmgt01-hpccicd01
       VMPREFIX: hpccicd01
@@ -69,11 +57,7 @@ jobs:
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
           # 設定ファイル変更反映
-<<<<<<< HEAD
           bash ./setupcreds.sh hpcbmtenv.sh
-=======
-          bash ./addcres.sh
->>>>>>> 1f62b87... Update 91creatingissues.yml
 
           # SSH秘密鍵の設定
           echo "setting ssh private key...."
@@ -85,7 +69,6 @@ jobs:
           echo "$SSH_PUBLIC_KEY" > ./${VMPREFIX}.pub
           md5sum ./${VMPREFIX}.pub
 
-<<<<<<< HEAD
           grep "MyResourceGroup=" ./hpcbmtenv.sh | head -n 1
           grep "VMPREFIX=" ./hpcbmtenv.sh | head -n 1
           grep "MAXVM=" ./hpcbmtenv.sh | head -n 1
@@ -99,20 +82,6 @@ jobs:
           # スクリプト実行：作成
           bash ./hpcbmtenv.sh updatensg
           bash ./hpcbmtenv.sh pingpong
-=======
-          grep "MyResourceGroup=" ./hpcbmtenvcreate-v2p3.sh | head -n 1
-          grep "VMPREFIX=" ./hpcbmtenvcreate-v2p3.sh | head -n 1
-          grep "MAXVM=" ./hpcbmtenvcreate-v2p3.sh | head -n 1
-          grep "azure_*" ./hpcbmtenvcreate-v2p3.sh  | head -n 3
-
-          # クルデンシャル
-          sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' hpcbmtenvcreate-v2p3.sh
-          sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' hpcbmtenvcreate-v2p3.sh
-          sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' hpcbmtenvcreate-v2p3.sh
-          
-          # スクリプト実行：作成
-          bash ./hpcbmtenvcreate-v2p3.sh pingpong
->>>>>>> 1f62b87... Update 91creatingissues.yml
 
           if [ ! -f ./result ]; then
             echo "::error:: error result file is not found!"
@@ -155,7 +124,6 @@ jobs:
           needs: ${{ toJson(needs) }}
           job: ${{ toJson(job) }}
           steps: ${{ toJson(steps) }}
-<<<<<<< HEAD
           dry_run: False
 
   websitebuilddeploy:
@@ -193,14 +161,12 @@ jobs:
         #cp ./docs/result/result.txt ./docs/result/result.rst
         logdate=$(date "+%Y%m%d_%H%M")
         cp ./docs/result/result.txt ./docs/result/result-${logdate}.rst
-<<<<<<< HEAD
-        echo "result/result-${logdate}.rst" >> ./docs/index.rst
-=======
         # インデックスが重要なためスペース3つ分あけること
         echo "   result/result-${logdate}.rst" >> ./docs/index.rst
->>>>>>> 5345ec5272408a8cc926b3440d75031f97f1fbc3
+        # Build
         sphinx-build -E -b singlehtml ./docs/ docs/_build
-        cp ./docs/_build/index.html docs/index.html
+        # Copy index.html to document root
+        cp ./docs/_build/index.html ./docs/index.html
 
     - name: Web Site Deploy Configuration
       run: |
@@ -221,7 +187,4 @@ jobs:
           git add ./docs/index.html
           git add ./docs/*
           git commit -m "auto rebuilding site"
-          git push origin main
-=======
-          dry_run: False
->>>>>>> 1f62b87... Update 91creatingissues.yml
+          git push origin gh-pages
