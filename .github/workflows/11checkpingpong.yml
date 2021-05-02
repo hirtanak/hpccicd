@@ -152,13 +152,20 @@ jobs:
         name: result.txt
         path: ./docs/result
 
+    - name: Web Site Deploy Configuration
+      run: |
+          mkdir ~/.ssh
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+          echo "${{ secrets.SSH_SECRET_KEY }}" > ~/.ssh/id_rsa
+          chmod 400 ~/.ssh/id_rsa
+
     - name: Web Site Push - delete
       env:
         GITHUB_USER: "hirtanak"
         GITHUB_EMAIL: "hirtanak@gmail.com"
         GITHUB_REPOSITORY: ${{ github.repository }}
       run: |
-          wget https://raw.githubusercontent.com/hirtanak/hpccicd/gh-pages/docs/index.rst.original -O ./index.rst.tmp
+          wget -q https://raw.githubusercontent.com/hirtanak/hpccicd/gh-pages/docs/index.rst.original -O ./index.rst.tmp
           git config --local user.name "${GITHUB_USER}"
           git config --local user.email "${GITHUB_EMAIL}"
           git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
@@ -183,13 +190,6 @@ jobs:
         sphinx-build -E -b singlehtml ./docs/ docs/_build
         # Copy index.html to document root
         cp ./docs/_build/index.html ./docs/index.html
-
-    - name: Web Site Deploy Configuration
-      run: |
-          mkdir ~/.ssh
-          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-          echo "${{ secrets.SSH_SECRET_KEY }}" > ~/.ssh/id_rsa
-          chmod 400 ~/.ssh/id_rsa
 
     - name: Web Site Push - update files
       env:
