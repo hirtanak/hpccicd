@@ -187,4 +187,4 @@ jobs:
           git add ./docs/index.html
           git add ./docs/*
           git commit -m "auto rebuilding site"
-          git push origin gh-pages
+          git push -f origin gh-pages
