@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 project01: 
   To do: 
     - "hirtanak"
@@ -15,27 +13,3 @@ project01:
   Reviewer approved:
     - "ytomoya"
   Done: []
-=======
-project01:
-  To do:
-=======
-project01: 
-  To do: 
->>>>>>> 1f62b87... Update 91creatingissues.yml
-    - "hirtanak"
-  In progress:
-    - "hirtanak"
-  deploying:
-    - "hirtanak"
-  checkperformance:
-    - "kuraishi-ms"
-  Review in progress:
-    - "kuraishi-ms"
-    - "ytomoya"
-  Reviewer approved:
-    - "ytomoya"
-  Done: []
-<<<<<<< HEAD
->>>>>>> 5345ec5272408a8cc926b3440d75031f97f1fbc3
-=======
->>>>>>> 1f62b87... Update 91creatingissues.yml

@@ -185,6 +185,7 @@ jobs:
           git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
           git add ./docs/_build/*
           git add ./docs/index.html
+          git add ./docs/result/*
           git add ./docs/*
-          git commit -m "auto rebuilding site"
+          git commit -m "pingpong: auto rebuilding site"
           git push -f origin HEAD:gh-pages

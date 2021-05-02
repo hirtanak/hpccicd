@@ -1,29 +1,17 @@
 name: 12addpbsnode
 on:
   workflow_run:
-<<<<<<< HEAD
     workflows: ["01azure_deploy"]
     branches: [main]
     types:
       - completed
 
 jobs:
-<<<<<<<< HEAD:.github/workflows/12addpbsnode.yml
   pbs_deploy:
     runs-on: ubuntu-latest
     # 呼び元のworkflowの結果が success であればジョブを実行
     # 11checkpingpong が成功すれば 12addpbsnode を実施する
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-=======
-    workflows: ["11checkpingpong"]
-    branches: [main]
-    types: 
-      - completed
-
-jobs:
-  pbs_deploy:
-    runs-on: ubuntu-latest
->>>>>>> 1f62b87... Update 91creatingissues.yml
     env:
       MyResourceGroup: tmcbmgt01-hpccicd01
       VMPREFIX: hpccicd01
@@ -68,11 +56,7 @@ jobs:
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
           # 設定ファイル変更反映
-<<<<<<< HEAD
           bash ./setupcreds.sh hpcbmtenv.sh
-=======
-          bash ./addcres.sh
->>>>>>> 1f62b87... Update 91creatingissues.yml
 
           # SSH秘密鍵の設定
           echo "setting ssh private key...."
@@ -84,7 +68,6 @@ jobs:
           echo "$SSH_PUBLIC_KEY" > ./${VMPREFIX}.pub
           md5sum ./${VMPREFIX}.pub
 
-<<<<<<< HEAD
           grep "MyResourceGroup=" ./hpcbmtenv.sh | head -n 1
           grep "VMPREFIX=" ./hpcbmtenv.sh | head -n 1
           grep "MAXVM=" ./hpcbmtenv.sh | head -n 1
@@ -179,14 +162,6 @@ jobs:
     name: pbs_deploy-success_teams_notification
     runs-on: ubuntu-18.04
     needs: [pbs_configure]
-========
-
-  success:
-    name: notify teams with success
-    runs-on: ubuntu-18.04
-    # 呼び元のworkflowの結果が success であればmain jobを実行
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
->>>>>>>> 1f62b87... Update 91creatingissues.yml:.github/workflows/02check_deploy.yml
     steps:
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
@@ -201,12 +176,12 @@ jobs:
       - name: sucuess! 
         run: |
           echo '::success::Previous workflow was sucuess!'
-<<<<<<<< HEAD:.github/workflows/12addpbsnode.yml
 
   if_failure:
     name: pbs_deploy-failure_teams_notification
     runs-on: ubuntu-18.04
-    needs: [pbs_configure]
+    # 失敗の場合、通知送付
+    if: always() # set always
     steps:
       # job azure_deploy の結果を得る
       - name: Getting azure_deploy result
@@ -218,44 +193,9 @@ jobs:
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
         if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
-========
-  
-  if_failure:
-    name: notify teams with failure
-    runs-on: ubuntu-18.04
-    # 呼び元のworkflowの結果が failure であればmain jobを実行
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    steps:
-      - uses: actions/checkout@master
-      - name: Microsoft Teams Notification
-        uses: skitionek/notify-microsoft-teams@master
-        if: failure()
->>>>>>>> 1f62b87... Update 91creatingissues.yml:.github/workflows/02check_deploy.yml
         with:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
           needs: ${{ toJson(needs) }}
           job: ${{ toJson(job) }}
-<<<<<<<< HEAD:.github/workflows/12addpbsnode.yml
           steps: ${{ toJson(steps) }}        
           dry_run: False
-========
-          steps: ${{ toJson(steps) }}          
-          dry_run: False
-      - name: make an error 
-        run: |
-          echo '::error::Previous workflow was failed'
->>>>>>>> 1f62b87... Update 91creatingissues.yml:.github/workflows/02check_deploy.yml
-=======
-          grep "MyResourceGroup=" ./hpcbmtenvcreate-v2p3.sh | head -n 1
-          grep "VMPREFIX=" ./hpcbmtenvcreate-v2p3.sh | head -n 1
-          grep "MAXVM=" ./hpcbmtenvcreate-v2p3.sh | head -n 1
-          grep "azure_*" ./hpcbmtenvcreate-v2p3.sh  | head -n 3
-
-          # クルデンシャル
-          sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' hpcbmtenvcreate-v2p3.sh
-          sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' hpcbmtenvcreate-v2p3.sh
-          sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' hpcbmtenvcreate-v2p3.sh
-          
-          # スクリプト実行：作成
-          bash ./hpcbmtenvcreate-v2p3.sh addlogin
->>>>>>> 1f62b87... Update 91creatingissues.yml

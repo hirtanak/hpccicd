@@ -56,11 +56,7 @@ jobs:
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
           echo "applying setupcreds.sh..."
-<<<<<<< HEAD
           bash ./setupcreds.sh installopenfoam-v1.sh
-=======
-          bash ./apps/openfoam/setupcreds.sh installopenfoam-v1.sh
->>>>>>> 1f62b87... Update 91creatingissues.yml
 
           echo "setting ssh private key...."
           echo "$SSH_SECRET_KEY" > ./${VMPREFIX}
@@ -79,9 +75,5 @@ jobs:
           sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./apps/openfoam/installopenfoam-v1.sh
           sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./apps/openfoam/installopenfoam-v1.sh
 
-<<<<<<< HEAD
           # 引数1: OpenFOAMバージョン
           bash ./apps/openfoam/installopenfoam-v1.sh v1906
-=======
-          bash ./apps/openfoam/installopenfoam-v1.sh
->>>>>>> 1f62b87... Update 91creatingissues.yml
