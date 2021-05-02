@@ -220,7 +220,3 @@ fi
 
 
 echo "$CMDNAME: end of application build & install script"
-<<<<<<< HEAD
->>>>>>> 1f62b87... Update 91creatingissues.yml
-=======
->>>>>>> 42cdc38... testing workflow..
