@@ -187,11 +187,11 @@ jobs:
           # index.rst対策
           git rm -f ./docs/index.rst
           git commit -m "index.rst delete"
-          git push --set-upstream -f origin HEAD:gh-pages
+          git push -f origin HEAD:gh-pages
           # update files        
           git add ./docs/_build/*
           git add ./docs/index.html
           git add ./docs/result/*
           git add ./docs/index.rst
           git commit -m "pingpong: auto rebuilding site"
-          git push --set-upstream -f origin HEAD:gh-pages
+          git push -f origin HEAD:gh-pages
