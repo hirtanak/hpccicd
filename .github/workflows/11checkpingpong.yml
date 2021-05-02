@@ -165,6 +165,7 @@ jobs:
           # index.rst対策
           git rm -f ./docs/index.rst
           git commit -m "index.rst delete"
+          git push -f origin HEAD:gh-pages
 
     - name: Web Site Build
       run: |
