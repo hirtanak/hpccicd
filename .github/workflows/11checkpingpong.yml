@@ -186,8 +186,11 @@ jobs:
         ###echo "   result/result-${logdate}.rst" >> ./docs/index.rst
         ###sed -i -e "$a "   result\/result-${logdate}.rst"" ./docs/index.rst
         ls ./docs/result/* > ./docs/list
-        # インデックスが重要なためスペース3つ分あけること。エコーの利用も問題あり。
+        # インデックスが重要なためスペース3つ分あけること
         sed -i -e "/result\//s/^/   /g" ./docs/list
+        # ./docs を削除
+        sed -i -e "s/\.\/docs\/result/\/result/g" ./docs/list
+        # sed, echo 以外でファイル統合
         cat ./docs/index.rst.tmp ./docs/list > ./docs/index.rst
         cat ./docs/index.rst
         # Build
