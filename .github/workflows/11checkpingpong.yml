@@ -179,12 +179,16 @@ jobs:
         ls -la ./
         mkdir -p ./docs ./docs/_build
         ls -la ./docs/
-        cp ./docs/index.rst.tmp ./docs/index.rst
-        logdate=$(date "+%Y%m%d_%H%M")
+        #cp ./docs/index.rst.tmp ./docs/index.rst
+        #logdate=$(date "+%Y%m%d_%H%M")
         cp ./docs/result/result.txt ./docs/result/result-${logdate}.rst
         ls -la ./docs/result/
-        # インデックスが重要なためスペース3つ分あけること。エコーの利用も問題あり。：echo "   result/result-${logdate}.rst" >> ./docs/index.rst
-        sed -i -e "$a "   result\/result-${logdate}.rst"" ./docs/index.rst
+        ###echo "   result/result-${logdate}.rst" >> ./docs/index.rst
+        ###sed -i -e "$a "   result\/result-${logdate}.rst"" ./docs/index.rst
+        ls result/* > ./docs/list
+        # インデックスが重要なためスペース3つ分あけること。エコーの利用も問題あり。
+        sed -i -e "/result\//s/^/   /g" ./docs/list
+        cat ./docs/index.rst.tmp ./docs/list > ./docs/index.rst
         cat ./docs/index.rst
         # Build
         sphinx-build -E -b singlehtml ./docs/ docs/_build
