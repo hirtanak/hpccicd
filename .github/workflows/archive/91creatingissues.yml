@@ -1,0 +1,46 @@
+name: 91creatingissues
+on:
+  workflow_run:
+    workflows: ["01azure_deploy"]
+    branches: [main]
+    types: 
+      - requested
+    paths-ignore:
+      - README.md
+      - LICENSE
+      - .github/workflow/92autocardassin.yml
+      - .github/project-card-assign.yml
+
+jobs:
+  # 作成された issue をプロジェクトに自動登録するためのジョブ
+  issuelist_generate:
+    name: Creating the issue for the project01
+    runs-on: ubuntu-latest
+    steps:
+
+    # Repo code checkout required if `template` is used
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # https://stackoverflow.com/a/60942437
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y/%m/%d-%H:%m')"
+
+    # 作成された issue をプロジェクトに自動登録
+    - name: Creating new deployment with create card
+      uses: imjohnbo/issue-bot@v3.3.0
+      with:
+        title: AzureDeployment - ${{ steps.date.outputs.date }}
+        assignees: "hirtanak"
+        labels: "azuredeploytest"
+        project: 1 # project01, number is 1
+        column: "In progress"
+        milestone: 1
+        body: |-
+          :wave: Hi, {{#each assignees}}@{{this}}{{#unless @last}}, {{/unless}}{{/each}}!        
+        pinned: false
+        close-previous: false
+        # template: ".github/ISSUE_TEMPLATE/generate_issuelist.md"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

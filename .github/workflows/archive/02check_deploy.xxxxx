@@ -1,0 +1,83 @@
+name: 02check_deploy
+on:
+  workflow_run:
+    workflows: ["01azure_deploy"]
+    branches: [main]
+    types: 
+      - completed
+
+jobs:
+
+  success:
+    name: notify teams with success
+    runs-on: ubuntu-18.04
+    # 呼び元のworkflowの結果が success であればmain jobを実行
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@master
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        if: always()
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          dry_run: False
+      - name: sucuess! 
+        run: |
+          echo '::success::Previous workflow was sucuess!'
+
+  # 作成された issue をプロジェクトに自動登録
+  issuelist_generate:
+    name: Creating the issue for the project01
+    runs-on: ubuntu-latest
+    needs: [success]
+    steps:
+
+    # Repo code checkout required if `template` is used
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # https://stackoverflow.com/a/60942437
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y/%m/%d')"
+
+    # 作成された issue をプロジェクトに自動登録
+    - name: Creating new deployment test
+      uses: imjohnbo/issue-bot@v3.3.0
+      with:
+        title: CheckAzureDeployment - ${{ steps.date.outputs.date }}
+        assignees: "hirtanak"
+        labels: "azuredeploytest"
+        project: 1 # project01, number is 1
+        column: "In progress"
+        milestone: 1
+        body: |-
+          :wave: Hi, {{#each assignees}}@{{this}}{{#unless @last}}, {{/unless}}{{/each}}!        
+        pinned: false
+        close-previous: false
+        # template: ".github/ISSUE_TEMPLATE/generate_issuelist.md"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+  if_failure:
+    name: notify teams with failure
+    runs-on: ubuntu-18.04
+    # 呼び元のworkflowの結果が failure であればmain jobを実行
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - uses: actions/checkout@master
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        if: failure()
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}          
+          dry_run: False
+      - name: make an error 
+        run: |
+          echo '::error::Previous workflow was failed'

@@ -1,0 +1,103 @@
+name: 83openfoam_benchmarktest
+on:
+  push:
+    branches: [main]
+    paths:
+      - senarios/runbmt
+
+jobs:
+  openfoam_bmttest1:
+    runs-on: ubuntu-latest
+    env:
+      MyResourceGroup: tmcbmgt01-hpccicd01
+      VMPREFIX: hpccicd01
+      # secret
+      AZURE_NAME: ${{ secrets.AZURE_NAME }}
+      AZURE_PASSWORD: ${{ secrets.AZURE_PASSWORD }}
+      AZURE_TENANT: ${{ secrets.AZURE_TENANT }}
+      SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
+      SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+    # Map a step output to a job output
+    outputs:
+      output1: ${{ steps.step1.outputs.test }}
+      output2: ${{ steps.step2.outputs.test }}
+      output3: ${{ steps.step3.outputs.test }}
+    steps:
+      # スクリプト実行には事前にリポジトリのチェックアウトが必要
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: "prep run script1"
+        run: |
+          echo "RG: ${MyResourceGroup}"
+          echo "VMPREFIX: ${VMPREFIX}"
+
+          # check environment
+          uname -a
+          cat /etc/debian_version
+          echo "GITHUB_ENV: $GITHUB_ENV"
+          # actだと必要。github actionsだとPermissionエラーになる
+          #sudo apt-get -qq update
+          #sudo apt-get -qq -y install libxml2-utils curl openssh-server
+          #apt-get -qq -y install curl openssh-server || sudo apt-get -qq -y install curl openssh-server
+          curl -V
+          # curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+          # github actions だとsudoが必要
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          az version -o table
+
+      - name: "run openfoam_bmttest1"
+        env:
+          # secret
+          AZURE_NAME: ${{ secrets.AZURE_NAME }}
+          AZURE_PASSWORD: ${{ secrets.AZURE_PASSWORD }}
+          AZURE_TENANT: ${{ secrets.AZURE_TENANT }}
+          SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+        run: |
+          echo "applying setupcreds.sh..."
+          bash ./setupcreds.sh openfoam_bmttest1.sh
+
+          echo "setting ssh private key...."
+          echo "$SSH_SECRET_KEY" > ./${VMPREFIX}
+          chmod 600 ./${VMPREFIX}
+          md5sum ./${VMPREFIX}
+          echo "setting ssh public key...."
+          echo "$SSH_PUBLIC_KEY" > ./${VMPREFIX}.pub
+          md5sum ./${VMPREFIX}.pub
+          
+          grep "MyResourceGroup=" ./apps/openfoam/openfoam_bmttest1.sh | head -n 1
+          grep "VMPREFIX=" ./apps/openfoam/openfoam_bmttest1.sh | head -n 1
+          grep "MAXVM=" ./apps/openfoam/openfoam_bmttest1.sh | head -n 1
+          grep "USERNAME=" ./apps/openfoam/openfoam_bmttest1.sh  | head -n 1
+          
+          sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./apps/openfoam/openfoam_bmttest1.sh
+          sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./apps/openfoam/openfoam_bmttest1.sh
+          sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./apps/openfoam/openfoam_bmttest1.sh
+
+          echo "ベンチマーク設定値"
+          echo "using benchmark setting... ./apps/openfoam/20210425-bmtconf-01"
+          bmtconf=$(cat ./senarios/bmtconf)
+
+          echo "ベンチマーク実施 @ bmtconf: $bmtconf"
+          bash ./apps/openfoam/openfoam_bmttest1.sh ${bmtconf}
+
+          echo "sleep 10 sec..."
+          sleep 10
+
+          echo "applying setupcreds.sh..."
+          bash ./apps/openfoam/setupcreds.sh openfoam_getbmtresult1.sh
+
+          sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./apps/openfoam/openfoam_getbmtresult1.sh
+          sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./apps/openfoam/openfoam_getbmtresult1.sh
+          sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./apps/openfoam/openfoam_getbmtresult1.sh
+
+          echo "ベンチマーク結果取得 @ bmtconf: $bmtconf"
+          bash ./apps/openfoam/openfoam_getbmtresult1.sh ${bmtconf}
+
+      - name: Upload benchmark result
+        uses: actions/upload-artifact@v2.2.3
+        if: always() # 上記が失敗した場合、デフォルトだと exit 1 でステップが実行されない。 alwaysで実施
+        with:
+          name: damBreak-result
+          path: ./*-damBreak.tar.gz
