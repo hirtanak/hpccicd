@@ -179,6 +179,7 @@ jobs:
       env:
         GITHUB_USER: "hirtanak"
         GITHUB_EMAIL: "hirtanak@gmail.com"
+        GITHUB_REPOSITORY: "hpccicd01"
       run: |
           git config --local user.name "${GITHUB_USER}"
           git config --local user.email "${GITHUB_EMAIL}"
