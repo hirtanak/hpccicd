@@ -1,7 +1,10 @@
 name: 81appinstall_openfoam
 on:
   push:
-    branches: [main]
+    branches:
+      - 'main/**'
+      - '!gh-pages/**'
+      - '!hirtanak/hpccicd'
     paths:
       - senarios/testappbuild
 
