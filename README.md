@@ -11,8 +11,6 @@ HPC環境作成の自動化・管理・アプリケーション管理の自動�
 ### 自動化ステータス：
 [![92autocardassin](https://github.com/hirtanak/hpccicd/actions/workflows/92autocardassin.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/92autocardassin.yml) : プロセス別プロジェクトアサイナーの自動変更
 
-[![94movecard](https://github.com/hirtanak/hpccicd/actions/workflows/94movecard.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/94movecard.yml) : 
-
 ### Basicインフラテスト
 [![11checkpingpong](https://github.com/hirtanak/hpccicd/actions/workflows/11checkpingpong.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/11checkpingpong.yml) : [MPI pingpong の結果表示](https://hirtanak.github.io/hpccicd/)
 
@@ -36,4 +34,7 @@ HPC環境作成の自動化・管理・アプリケーション管理の自動�
 [![91creatingissues](https://github.com/hirtanak/hpccicd/actions/workflows/91creatingissues.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/91creatingissues.yml) : テスト(issue)自動生成 
 
 [![93makepingpongresult](https://github.com/hirtanak/hpccicd/actions/workflows/93makepingpongresult.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/93makepingpongresult.yml) : MPI pingpong の結果表示
+
+[![94movecard](https://github.com/hirtanak/hpccicd/actions/workflows/94movecard.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/94movecard.yml) : 
+
 
