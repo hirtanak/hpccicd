@@ -1,7 +1,11 @@
 name: 01azure_deploy
 on:
   push:
-    branches: [main]
+    branches:
+      - 'main/**'
+      - '!gh-pages/**'
+      - '!hirtanak/hpccicd'
+  
     paths:
       - senarios/basicdeploy
 
