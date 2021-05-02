@@ -183,7 +183,7 @@ jobs:
       run: |
           git config --local user.name "${GITHUB_USER}"
           git config --local user.email "${GITHUB_EMAIL}"
-          git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git]
+          git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
           # index.rst対策
           git rm -f ./docs/index.rst
           git commit -m "index.rst delete"
