@@ -182,7 +182,12 @@ jobs:
       run: |
           git config --local user.name "${GITHUB_USER}"
           git config --local user.email "${GITHUB_EMAIL}"
-          git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
+          git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git]
+          # index.rst対策
+          git add ./docs/index.rst
+          git commit -m "index.rst delete"
+          git push -f origin HEAD:gh-pages
+          # update files        
           git add ./docs/_build/*
           git add ./docs/index.html
           git add ./docs/result/*
