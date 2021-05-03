@@ -199,10 +199,7 @@ jobs:
     needs: setup_failure
     if: always()
     outputs:
-      #status_azure_deploy:
-      #description: "status_azure_deploy"
-      #value: ${{ steps.set_outputs.outputs.status_azure_deploy }}
-      STATUS_AZURE_DEPLOY:
+      status_azure_deploy:
       description: "status_azure_deploy"
       value: ${{ steps.set_outputs.outputs.status_azure_deploy }}
     steps:
@@ -223,8 +220,6 @@ jobs:
         id: set_outputs
         run: |
           echo "::set-output name=status_azure_deploy::$(<pass_status_azure_deploy/status_azure_deploy.txt)"
-          echo "::set-output name=STATUS_AZURE_DEPLOY::$(<pass_status_azure_deploy/status_azure_deploy.txt)"
-          #echo "STATUS_AZURE_DEPLOY: ${{ STATUS_AZURE_DEPLOY }}"
           if [ steps.azure_deploy.outputs.set_outputs == failure ]; then
             exit 1
           fi
