@@ -198,6 +198,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: dummy
     if: always()
+    outputs:
+      status_azure_deploy:
+      description: "status_azure_deploy"
+      value: ${{ steps.set_outputs.outputs.status_azure_deploy }}
     steps:
       # job azure_deploy の結果を得る
       #- name: Getting azure_deploy result
