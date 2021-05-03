@@ -187,13 +187,13 @@ jobs:
     needs: azure_deploy
     steps:
       - name: dummy
-        uses: actions/download-artifact@v1
+      - uses: actions/checkout@master
         run: |
           uname
 
   if_failure:
     name: azure_deploy-failure_teams_notification
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     needs: dummy
     steps:
       # job azure_deploy の結果を得る
