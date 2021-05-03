@@ -136,6 +136,8 @@ jobs:
           SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
+          exit 1
+
           # 設定ファイル変更反映
           bash ./setupcreds.sh hpcbmtenv.sh
 
@@ -194,70 +196,92 @@ jobs:
         run: |
           echo '::success::Previous workflow was sucuess!'
 
-  if_failure:
-    name: pbs-failure_teams_notification
-    runs-on: ubuntu-18.04
-    needs: success
-    #if: always() # set always
+  setup_failure:
+    name: setup_failure
+    runs-on: ubuntu-latest
+    needs: pbs_deploy
     steps:
+      - name: setup_failure
+        uses: actions/checkout@v2
+      - name: dummy
+        run: uname -a
+
+  deploy_failure:
+    name: pbs_deploy-failure_teams_notification
+    runs-on: ubuntu-latest
+    needs: setup_failure
+    if: always()
+    outputs:
+      status_pbs_deploy: ${{ steps.set_outputs_pbs.outputs.status_pbs_deploy }}
+    steps:
+      - uses: actions/checkout@master
+
       - name: Download artifact pass_status_pbs_deploy
         uses: actions/download-artifact@v1
         with:
           name: pass_status_pbs_deploy
+
+      - name: Set the statuses of pbs_deploy as output parameters
+        id: set_outputs_pbs
+        run: |
+          echo "::set-output name=status_pbs_deploy::$(<pass_status_azure_deploy/status_pbs_deploy.txt)"
+          echo "::set-output name=pass_status_pbs_deploy::$(<pass_status_azure_deploy/status_pbs_deploy.txt)"
+      - name: check_failure
+        if: steps.set_outputs_pbs.outputs.status_pbs_deploy == 'failure'
+        run: |
+            echo "steps.set_outputs_pbs.outputs.status_pbs_deploy: ${{ steps.set_outputs_pbs.outputs.status_pbs_deploy }}"
+            exit 1
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        if: failure()
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}        
+          dry_run: False
+
+  setup_failure:
+    name: setup_failure
+    runs-on: ubuntu-latest
+    needs: pbs_configure
+    steps:
+      - name: setup_failure
+        uses: actions/checkout@v2
+      - name: dummy
+        run: uname -a
+
+  deploy_failure2:
+    name: pbs_deploy-failure_teams_notification
+    runs-on: ubuntu-latest
+    needs: setup_failure2
+    if: always()
+    outputs:
+      status_pbs_config: ${{ steps.set_outputs_pbs2.outputs.status_pbs_config }}
+    steps:
+      - uses: actions/checkout@master
 
       - name: Download artifact pass_status_pbs_config
         uses: actions/download-artifact@v1
         with:
           name: pass_status_pbs_config
 
-      - name: Set the statuses of pbs_deploy and pbs_configure as output parameters
-        id: set_outputs
+      - name: Set the statuses of pbs_configure as output parameters
+        id: set_outputs_pbs2
         run: |
-          echo "::set-output name=status_pbs_deploy::$(<pass_status_pbs_deploy/status_pbs_deploy.txt)"
-          echo "::set-output name=status_pbs_config::$(<pass_status_pbs_config/status_pbs_config.txt)"
-
-      - name: Show the values of the outputs
+          echo "::set-output name=status_pbs_config::$(<pass_status_azure_deploy/status_pbs_config.txt)"
+          echo "::set-output name=pass_status_pbs_config::$(<pass_status_azure_deploy/status_pbs_config.txt)"
+      - name: check_failure - pbs_configure
+        if: steps.set_outputs_pbs2.outputs.status_pbs_config == 'failure'
         run: |
-          # using the syntax steps.<step_id>.outputs.<output_name> to access the output parameters
-          echo "status_pbs_deploy = ${{ steps.set_outputs.outputs.status_pbs_deploy }}"
-          echo "status_pbs_config = ${{ steps.set_outputs.outputs.status_pbs_config }}"
-
-      # job azure_deploy の結果を得る
-      #- name: Getting azure_deploy result
-      #  uses: technote-space/workflow-conclusion-action@v2
-      #- run: |
-      #    echo "env.WORKFLOW_CONCLUSION"
-      #    echo ${{ env.WORKFLOW_CONCLUSION }}
-      - uses: actions/checkout@master
-      - name: PBS_DEPLOY - Microsoft Teams Notification
+            echo "steps.set_outputs_pbs2.outputs.status_pbs_config: ${{ steps.set_outputs_pbs2.outputs.status_pbs_config }}"
+            exit 1
+      - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
-        #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
-        #if: ${{ failure() }}
-        if: ${{ steps.set_outputs.outputs.status_pbs_deploy }} == 'failure'
+        if: failure()
         with:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
           needs: ${{ toJson(needs) }}
           job: ${{ toJson(job) }}
           steps: ${{ toJson(steps) }}        
           dry_run: False
-        #env: 
-        #  WORKFLOW_CONCLUSION: ${{ env.WORKFLOW_CONCLUSION }}
-      - name: error! 
-        run: |
-          echo '::error::PBS pbs_deploy was failure!
-      - name: PBS_CONFIG - Microsoft Teams Notification
-        uses: skitionek/notify-microsoft-teams@master
-        #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
-        #if: ${{ failure() }}
-        if: ${{ steps.set_outputs.outputs.status_pbs_config }} == 'failure'
-        with:
-          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
-          needs: ${{ toJson(needs) }}
-          job: ${{ toJson(job) }}
-          steps: ${{ toJson(steps) }}        
-          dry_run: False
-        #env: 
-        #  WORKFLOW_CONCLUSION: ${{ env.WORKFLOW_CONCLUSION }}
-      - name: error! 
-        run: |
-          echo '::error::PBS pbs_config was failure!

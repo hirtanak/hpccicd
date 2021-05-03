@@ -68,9 +68,7 @@ jobs:
         run: |
           echo "RG: ${MyResourceGroup}"
           echo "VMPREFIX: ${VMPREFIX}"
-
-          exit 1
-
+  
           # check environment
           uname -a
           cat /etc/debian_version
@@ -188,10 +186,8 @@ jobs:
     steps:
       - name: setup_failure
         uses: actions/checkout@v2
-
       - name: dummy
-        run: |
-          uname -a
+        run: uname -a
 
   deploy_failure:
     name: azure_deploy-failure_teams_notification
@@ -220,19 +216,11 @@ jobs:
           echo "::set-output name=status_azure_deploy::$(<pass_status_azure_deploy/status_azure_deploy.txt)"
           echo "::set-output name=pass_status_azure_deploy::$(<pass_status_azure_deploy/status_azure_deploy.txt)"
       - name: check_failure
-        #if: ${{ steps.set_outputs.outputs.status_azure_deploy }} == 'failure'
         #if: ${{ needs.deploy_failure.outputs.azure_deploy }} == 'failure'
         if: steps.set_outputs.outputs.status_azure_deploy == 'failure'
         run: |
-            echo "xx: ${{ needs.deploy_failure.outputs.status_azure_deploy }}"
-            echo "yy: ${{ steps.set_outputs.outputs.status_azure_deploy }}"
+            echo "steps.set_outputs.outputs.status_azure_deploy: ${{ steps.set_outputs.outputs.status_azure_deploy }}"
             exit 1
-            echo "status_azure_deploy: $status_azure_deploy"
-            echo "pass_status_azure_deploy: $pass_status_azure_deploy"
-            echo "needs.deploy_failure.outputs.azure_deploy: ${{ needs.deploy_failure.outputs.azure_deploy }}"
-            if [ ${{ needs.deploy_failure.outputs.status_azure_deploy }} == failure ]; then
-              exit 1
-            fi
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
         #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
