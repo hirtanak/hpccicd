@@ -16,11 +16,12 @@ jobs:
         id: jobid
         uses: actions/checkout@master
       - run: |
-          WORKFLOW_CONCLUSIONasdasdasd
-      - name: Getting sss
-        uses: actions/checkout@master
-      - run: |
-          echo ${{needs.jobid.outputs.joboutput}} 
+          curl \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/octocat/hello-world/actions/jobs/42/logs
+        env:
+          SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}      
           
   success:
     name: pbs-success_teams_notification

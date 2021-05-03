@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
     paths:
-      - senarios/test
+      - senarios/test0
 
 jobs:
   dummy:
