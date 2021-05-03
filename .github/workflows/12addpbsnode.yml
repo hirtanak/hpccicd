@@ -226,8 +226,8 @@ jobs:
       - name: Set the statuses of pbs_deploy as output parameters
         id: set_outputs_pbs
         run: |
-          echo "::set-output name=status_pbs_deploy::$(<pass_status_azure_deploy/status_pbs_deploy.txt)"
-          echo "::set-output name=pass_status_pbs_deploy::$(<pass_status_azure_deploy/status_pbs_deploy.txt)"
+          echo "::set-output name=status_pbs_deploy::$(<pass_status_pbs_deploy/status_pbs_deploy.txt)"
+          echo "::set-output name=pass_status_pbs_deploy::$(<pass_status_pbs_deploy/status_pbs_deploy.txt)"
       - name: check_failure
         if: steps.set_outputs_pbs.outputs.status_pbs_deploy == 'failure'
         run: |
