@@ -220,6 +220,8 @@ jobs:
           if [ steps.azure_deploy.outputs.set_outputs == failure ]; then
             exit 1
           fi
+        env:
+          steps.azure_deploy.outputs.set_outputs: ${{ steps.azure_deploy.outputs.set_outputs }}
           
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
