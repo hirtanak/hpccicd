@@ -223,13 +223,6 @@ jobs:
           echo "pass_status_azure_deploy: $pass_status_azure_deploy"
       - name: check_failure
         run:        
-          if [ steps.azure_deploy.outputs.set_outputs == failure ]; then
-            exit 1
-          fi
-          if [ status_azure_deploy == failure ]; then
-            echo '::error::azure_deploy was failed'
-            exit 1
-          fi
           if [ pass_status_azure_deploy == failure ]; then
             echo '::error::azure_deploy was failed'
             exit 1
