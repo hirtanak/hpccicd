@@ -13,8 +13,6 @@ jobs:
     # on.push.paths と on.push.branch の && は利用できないため回避策
     if: github.ref == 'refs/heads/main'
     outputs:
-#      output1: ${{ steps.step1.outputs.test }}
-#      output2: ${{ steps.step2.outputs.test }}
       cardid: ${{ steps.cardid.outputs.cardid }}
       issue-number: ${{ steps.cardid.outputs.issue.number }}
     steps:
@@ -175,7 +173,7 @@ jobs:
   if_failure:
     name: azure_deploy-failure_teams_notification
     runs-on: ubuntu-18.04
-    needs: add_label
+    needs: azure_deploy
     steps:
       # job azure_deploy の結果を得る
       - name: Getting azure_deploy result

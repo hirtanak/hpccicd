@@ -198,7 +198,8 @@ jobs:
   if_failure:
     name: pbs-failure_teams_notification
     runs-on: ubuntu-18.04
-    if: always() # set always
+    needs: success
+    #if: always() # set always
     steps:
       - name: Download artifact pass_status_pbs_deploy
         uses: actions/download-artifact@v1
