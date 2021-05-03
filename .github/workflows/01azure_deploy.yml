@@ -227,8 +227,6 @@ jobs:
             echo '::error::azure_deploy was failed'
             exit 1
           fi
-        env:
-          status_azure_deploy: ${{ steps.azure_deploy.outputs.set_outputs }}
         with:
           status_azure_deploy: ${{ steps.azure_deploy.outputs.set_outputs }}
           
