@@ -159,7 +159,7 @@ jobs:
       - name: Getting azure_deploy result
         uses: technote-space/workflow-conclusion-action@v2
       - run: |
-          env.WORKFLOW_CONCLUSION == failure
+          WORKFLOW_CONCLUSION="failure"
           
   success:
     name: pbs-success_teams_notification
