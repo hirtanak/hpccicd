@@ -19,11 +19,6 @@ jobs:
       AZURE_TENANT: ${{ secrets.AZURE_TENANT }}
       SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
       SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
-    # Map a step output to a job output
-    outputs:
-      output1: ${{ steps.step1.outputs.test }}
-      output2: ${{ steps.step2.outputs.test }}
-      output3: ${{ steps.step3.outputs.test }}
     steps:
       # スクリプト実行には事前にリポジトリのチェックアウトが必要
       - name: Check out repository

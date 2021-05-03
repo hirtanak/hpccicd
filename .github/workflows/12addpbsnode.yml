@@ -136,8 +136,6 @@ jobs:
           SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
-          exit 1
-
           # 設定ファイル変更反映
           bash ./setupcreds.sh hpcbmtenv.sh
 
