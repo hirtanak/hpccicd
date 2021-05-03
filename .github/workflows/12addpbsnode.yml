@@ -241,7 +241,7 @@ jobs:
           steps: ${{ toJson(steps) }}        
           dry_run: False
 
-  setup_failure:
+  setup_failure2:
     name: setup_failure
     runs-on: ubuntu-latest
     needs: pbs_configure
