@@ -222,7 +222,7 @@ jobs:
       - name: check_failure
         #if: ${{ steps.set_outputs.outputs.status_azure_deploy }} == 'failure'
         #if: ${{ needs.deploy_failure.outputs.azure_deploy }} == 'failure'
-        if: steps.set_outputs.outputs.status_azure_deploy == failure''
+        if: steps.set_outputs.outputs.status_azure_deploy == 'failure'
         run: |
             echo "xx: ${{ needs.deploy_failure.outputs.status_azure_deploy }}"
             echo "yy: ${{ steps.set_outputs.outputs.status_azure_deploy }}"
