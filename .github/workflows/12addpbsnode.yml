@@ -167,6 +167,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Getting azure_deploy result
+        id: jobid
         uses: actions/checkout@master
       - run: |
           WORKFLOW_CONCLUSIONasdasdas
@@ -206,7 +207,7 @@ jobs:
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
         #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
-        if: job.steps.testjob2.status == failure()
+        if: steps.jobid.conclusion == failure()
         #if: ${{ failure() }}
         with:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
