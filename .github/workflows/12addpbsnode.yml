@@ -1,10 +1,10 @@
 name: 12addpbsnode
 on:
-  #workflow_run:
-  #  workflows: ["01azure_deploy"]
-  #  branches: [main]
-  #  types:
-  #    - completed
+  workflow_run:
+    workflows: ["01azure_deploy"]
+    branches: [main]
+    types:
+      - completed
   push:
     branches: [main]
     paths:
@@ -152,10 +152,19 @@ jobs:
           bash ./hpcbmtenv.sh updatensg
           bash ./pbssetting.sh
 
+  testjob:
+    name: testjob
+    runs-on: ubuntu-latest
+    steps:
+      - name: Getting azure_deploy result
+        uses: technote-space/workflow-conclusion-action@v2
+      - run: |
+          env.WORKFLOW_CONCLUSION == failure
+          
   success:
     name: pbs-success_teams_notification
     runs-on: ubuntu-18.04
-    needs: [pbs_configure]
+    needs: [testjob]
     steps:
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
