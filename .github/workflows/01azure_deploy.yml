@@ -172,7 +172,7 @@ jobs:
   if_failure:
     name: azure_deploy-failure_teams_notification
     runs-on: ubuntu-18.04
-    needs: azure_deploy
+    needs: success
     steps:
       # job azure_deploy の結果を得る
       - name: Getting azure_deploy result
