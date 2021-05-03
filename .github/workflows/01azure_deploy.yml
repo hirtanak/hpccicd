@@ -117,6 +117,18 @@ jobs:
           bash ./hpcbmtenv.sh updatensg          
           bash ./hpcbmtenv.sh create
 
+      - name: Create file status_azure_deploy.txt and write the job status into it
+        if: always()
+        run: |
+          echo ${{ job.status }} > status_azure_deploy.txt
+
+      - name: Upload file status_azure_deploy.txt as an artifact
+        if: always()
+        uses: actions/upload-artifact@v1
+        with:
+          name: pass_status_azure_deploy
+          path: status_azure_deploy.txt
+
   success:
     name: azure_deploy-success_teams_notification
     runs-on: ubuntu-18.04
@@ -172,18 +184,29 @@ jobs:
   if_failure:
     name: azure_deploy-failure_teams_notification
     runs-on: ubuntu-18.04
-    needs: success
+    if: always()
     steps:
       # job azure_deploy の結果を得る
-      - name: Getting azure_deploy result
-        uses: technote-space/workflow-conclusion-action@v2
-      - run: |
-          echo "show the workflow conclusion"
-          echo ${{ env.WORKFLOW_CONCLUSION }}
+      #- name: Getting azure_deploy result
+      #  uses: technote-space/workflow-conclusion-action@v2
+      #- run: |
+      #    echo "show the workflow conclusion"
+      #    echo ${{ env.WORKFLOW_CONCLUSION }}
+      - name: Download artifact pass_status_azure_deploy
+        uses: actions/download-artifact@v1
+        with:
+          name: pass_status_azure_deploy
+
+      - name: Set the statuses of azure_deploy as output parameters
+        id: set_outputs
+        run: |
+          echo "::set-output name=status_azure_deploy::$(<pass_status_azure_deploy/status_azure_deploy.txt)"
+
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
-        if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
+        #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
+        if: status_azure_deploy == failure
         with:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
           needs: ${{ toJson(needs) }}
@@ -191,6 +214,6 @@ jobs:
           steps: ${{ toJson(steps) }}        
           dry_run: False
       - name: make an error
-        if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
+        #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
         run: |
           echo '::error::Previous workflow was failed'
