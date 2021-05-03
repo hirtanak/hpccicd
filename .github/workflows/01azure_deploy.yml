@@ -181,22 +181,22 @@ jobs:
           labels: 01done
           repo: github.event.issue.number = ${{ steps.cardid.outputs.issue.number }}
 
-  dummy:
-    name: dummy
+  setup_failure:
+    name: setup_failure
     runs-on: ubuntu-latest
     needs: azure_deploy
     steps:
-      - name: dummy
+      - name: setup_failure
         uses: actions/checkout@v2
 
-      - name: dummy2
+      - name: dummy
         run: |
           uname -a
 
-  if_failure:
+  deploy_failure:
     name: azure_deploy-failure_teams_notification
     runs-on: ubuntu-latest
-    needs: dummy
+    needs: setup_failure
     if: always()
     outputs:
       status_azure_deploy:
@@ -220,6 +220,7 @@ jobs:
         id: set_outputs
         run: |
           echo "::set-output name=status_azure_deploy::$(<pass_status_azure_deploy/status_azure_deploy.txt)"
+          echo "STATUS_AZURE_DEPLOY: ${{ STATUS_AZURE_DEPLOY }}"
           if [ steps.azure_deploy.outputs.set_outputs == failure ]; then
             exit 1
           fi
@@ -228,7 +229,7 @@ jobs:
             exit 1
           fi
         env:
-          status_azure_deploy: ${{ steps.azure_deploy.outputs.set_outputs }}
+          STATUS_AZURE_DEPLOY: ${{ steps.azure_deploy.outputs.set_outputs }}
           
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
