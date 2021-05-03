@@ -152,17 +152,8 @@ jobs:
           bash ./hpcbmtenv.sh updatensg
           bash ./pbssetting.sh
 
-  testjob:
-    name: testjob
-    runs-on: ubuntu-latest
-    steps:
-      - name: Getting azure_deploy result
-        uses: actions/checkout@master
-      - run: |
-          WORKFLOW_CONCLUSION="failure"
-
-  testjob2:
-    name: testjob2
+  testjob0:
+    name: testjob0
     needs: testjob
     runs-on: ubuntu-latest
     steps:
@@ -171,11 +162,21 @@ jobs:
         uses: actions/checkout@master
       - run: |
           WORKFLOW_CONCLUSIONasdasdas
+
+  testjob:
+    name: testjob
+    runs-on: ubuntu-latest
+    needs: testjob0
+    steps:
+      - name: Getting azure_deploy result
+        uses: actions/checkout@master
+      - run: |
+          WORKFLOW_CONCLUSION="failure"
           
   success:
     name: pbs-success_teams_notification
     runs-on: ubuntu-18.04
-    needs: [testjob2]
+    needs: [testjob]
     steps:
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
@@ -206,8 +207,7 @@ jobs:
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
-        #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
-        if: steps.jobid.conclusion == failure()
+        if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
         #if: ${{ failure() }}
         with:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
