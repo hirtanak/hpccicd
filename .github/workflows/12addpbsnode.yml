@@ -163,6 +163,7 @@ jobs:
 
   testjob2:
     name: testjob2
+    needs: testjob
     runs-on: ubuntu-latest
     steps:
       - name: Getting azure_deploy result
@@ -193,8 +194,8 @@ jobs:
     name: pbs-failure_teams_notification
     runs-on: ubuntu-18.04
     # 失敗の場合、通知送付
-    #if: always() # set always
-    if: failure()
+    if: always() # set always
+    #needs: testjob2
     steps:
       # job azure_deploy の結果を得る
       - name: Getting azure_deploy result
