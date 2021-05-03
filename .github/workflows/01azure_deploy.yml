@@ -187,9 +187,11 @@ jobs:
     needs: azure_deploy
     steps:
       - name: dummy
-      - uses: actions/checkout@master
+        uses: actions/checkout@v2
+
+      - name: dummy2
         run: |
-          uname
+          uname -a
 
   if_failure:
     name: azure_deploy-failure_teams_notification
