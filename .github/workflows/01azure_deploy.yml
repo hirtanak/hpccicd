@@ -197,6 +197,7 @@ jobs:
     name: azure_deploy-failure_teams_notification
     runs-on: ubuntu-latest
     needs: dummy
+    if: always()
     steps:
       # job azure_deploy の結果を得る
       #- name: Getting azure_deploy result
