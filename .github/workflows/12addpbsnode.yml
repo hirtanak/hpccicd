@@ -81,6 +81,18 @@ jobs:
           bash ./hpcbmtenv.sh updatensg          
           bash ./hpcbmtenv.sh addlogin
 
+      - name: Create file status_pbs_deploy.txt and write the job status into it
+        if: always()
+        run: |
+          echo ${{ job.status }} > status_pbs_deploy.txt
+
+      - name: Upload file status_job01.txt as an artifact
+        if: always()
+        uses: actions/upload-artifact@v1
+        with:
+          name: pass_status_pbs_deploy
+          path: status_pbs_deploy.txt
+
   pbs_configure:
     runs-on: ubuntu-latest
     needs: pbs_deploy
@@ -152,30 +164,22 @@ jobs:
           bash ./hpcbmtenv.sh updatensg
           bash ./pbssetting.sh
 
-  testjob0:
-    name: testjob0
-    runs-on: ubuntu-latest
-    steps:
-      - name: Getting azure_deploy result
-        id: jobid
-        uses: actions/checkout@master
-      - run: |
-          WORKFLOW_CONCLUSION="failure"
+      - name: Create file status_pbs_config.txt and write the job status into it
+        if: always()
+        run: |
+          echo ${{ job.status }} > status_pbs_config.txt
 
-  testjob:
-    name: testjob
-    runs-on: ubuntu-latest
-    needs: testjob0
-    steps:
-      - name: Getting azure_deploy result
-        uses: actions/checkout@master
-      - run: |
-          WORKFLOW_CONCLUSION="failure"
+      - name: Upload file status_job02.txt as an artifact
+        if: always()
+        uses: actions/upload-artifact@v1
+        with:
+          name: pass_status_pbs_config
+          path: status_pbs_config.txt
           
   success:
     name: pbs-success_teams_notification
     runs-on: ubuntu-18.04
-    needs: [testjob]
+    needs: [pbs_configure]
     steps:
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
@@ -194,25 +198,66 @@ jobs:
   if_failure:
     name: pbs-failure_teams_notification
     runs-on: ubuntu-18.04
-    # 失敗の場合、通知送付
     if: always() # set always
     steps:
+      - name: Download artifact pass_status_pbs_deploy
+        uses: actions/download-artifact@v1
+        with:
+          name: pass_status_pbs_deploy
+
+      - name: Download artifact pass_status_pbs_config
+        uses: actions/download-artifact@v1
+        with:
+          name: pass_status_pbs_config
+
+      - name: Set the statuses of pbs_deploy and pbs_configure as output parameters
+        id: set_outputs
+        run: |
+          echo "::set-output name=status_pbs_deploy::$(<pass_status_pbs_deploy/status_pbs_deploy.txt)"
+          echo "::set-output name=status_pbs_config::$(<pass_status_pbs_config/status_pbs_config.txt)"
+
+      - name: Show the values of the outputs
+        run: |
+          # using the syntax steps.<step_id>.outputs.<output_name> to access the output parameters
+          echo "status_pbs_deploy = ${{ steps.set_outputs.outputs.status_pbs_deploy }}"
+          echo "status_pbs_config = ${{ steps.set_outputs.outputs.status_pbs_config }}"
+
       # job azure_deploy の結果を得る
-      - name: Getting azure_deploy result
-        uses: technote-space/workflow-conclusion-action@v2
-      - run: |
-          echo "env.WORKFLOW_CONCLUSION"
-          echo ${{ env.WORKFLOW_CONCLUSION }}
+      #- name: Getting azure_deploy result
+      #  uses: technote-space/workflow-conclusion-action@v2
+      #- run: |
+      #    echo "env.WORKFLOW_CONCLUSION"
+      #    echo ${{ env.WORKFLOW_CONCLUSION }}
       - uses: actions/checkout@master
-      - name: Microsoft Teams Notification
+      - name: PBS_DEPLOY - Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
-        if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
+        #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
         #if: ${{ failure() }}
+        if: ${{ steps.set_outputs.outputs.status_pbs_deploy }} == 'failure'
         with:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
           needs: ${{ toJson(needs) }}
           job: ${{ toJson(job) }}
           steps: ${{ toJson(steps) }}        
           dry_run: False
-        env: 
-          WORKFLOW_CONCLUSION: ${{ env.WORKFLOW_CONCLUSION }}
+        #env: 
+        #  WORKFLOW_CONCLUSION: ${{ env.WORKFLOW_CONCLUSION }}
+      - name: error! 
+        run: |
+          echo '::error::PBS pbs_deploy was failure!
+      - name: PBS_CONFIG - Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
+        #if: ${{ failure() }}
+        if: ${{ steps.set_outputs.outputs.status_pbs_config }} == 'failure'
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}        
+          dry_run: False
+        #env: 
+        #  WORKFLOW_CONCLUSION: ${{ env.WORKFLOW_CONCLUSION }}
+      - name: error! 
+        run: |
+          echo '::error::PBS pbs_config was failure!
