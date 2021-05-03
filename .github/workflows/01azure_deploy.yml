@@ -198,10 +198,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup_failure
     if: always()
-    outputs:
-      status_azure_deploy:
-      description: "status_azure_deploy"
-      value: ${{ steps.set_outputs.outputs.status_azure_deploy }}
     steps:
       # job azure_deploy の結果を得る
       #- name: Getting azure_deploy result
@@ -221,13 +217,12 @@ jobs:
         run: |
           echo "::set-output name=status_azure_deploy::$(<pass_status_azure_deploy/status_azure_deploy.txt)"
           echo "::set-output name=pass_status_azure_deploy::$(<pass_status_azure_deploy/status_azure_deploy.txt)"
-          echo "pass_status_azure_deploy: $pass_status_azure_deploy"
       - name: check_failure
+        if: ${{ steps.set_outputs.outputs.status_azure_deploy }} == 'failure'
         run: | 
             echo "status_azure_deploy: $status_azure_deploy"
             echo "pass_status_azure_deploy: $pass_status_azure_deploy"
-            if [ pass_status_azure_deploy == failure ]; then exit 1; fi
-            if [ status_azure_deploy == failure ]; then exit 1; fi
+            exit 1
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
         #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
