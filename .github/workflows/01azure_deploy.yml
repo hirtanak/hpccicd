@@ -223,12 +223,12 @@ jobs:
         #if: ${{ steps.set_outputs.outputs.status_azure_deploy }} == 'failure'
         if: ${{ needs.deploy_failure.outputs.azure_deploy }} == 'failure'
         run: |
-            echo "xx: ${{ needs.deploy_failure.outputs.azure_deploy }}"
-            exit 1
+            echo "xx: ${{ needs.deploy_failure.outputs.status_azure_deploy }}"
+            #exit 1
             echo "status_azure_deploy: $status_azure_deploy"
             echo "pass_status_azure_deploy: $pass_status_azure_deploy"
             echo "needs.deploy_failure.outputs.azure_deploy: ${{ needs.deploy_failure.outputs.azure_deploy }}"
-            if [ ${{ needs.deploy_failure.outputs.azure_deploy }} == failure ]; then
+            if [ ${{ needs.deploy_failure.outputs.status_azure_deploy }} == failure ]; then
               exit 1
             fi
       - name: Microsoft Teams Notification
