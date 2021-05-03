@@ -9,18 +9,18 @@ jobs:
   testjob0:
     name: testjob0
     runs-on: ubuntu-latest
+    outputs:
+      joboutput: ${{ steps.jobid.outputs.joboutput }}
     steps:
-      - name: Getting azure_deploy result
+      - name: sss
         id: jobid
         uses: actions/checkout@master
       - run: |
           WORKFLOW_CONCLUSIONasdasdasd
-        # job azure_deploy の結果を得る
-      - name: Getting azure_deploy result
-        uses: technote-space/workflow-conclusion-action@v2
+      - name: Getting sss
+        uses: actions/checkout@master
       - run: |
-          echo "env.WORKFLOW_CONCLUSION"
-          echo ${{ env.WORKFLOW_CONCLUSION }}
+          echo ${{needs.jobid.outputs.joboutput}} 
           
   success:
     name: pbs-success_teams_notification
