@@ -17,8 +17,7 @@ jobs:
         uses: actions/checkout@master
       - run: |
           curl \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/octocat/hello-world/actions/jobs/42/logs
+          -H "Accept: application/vnd.github.v3+json" https://api.github.com/hirtanak/hpccicd/actions/jobs/42/logs
         env:
           SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}      

@@ -1,11 +1,6 @@
 name: 01azure_deploy
 on:
   push:
-    branches:
-      - 'main/**'
-      - '!gh-pages/**'
-      - '!hirtanak/hpccicd'
-  
     paths:
       - senarios/basicdeploy
 
@@ -15,6 +10,8 @@ jobs:
   issue_generate:
     name: Creating the issue for the project01
     runs-on: ubuntu-latest
+    # on.push.paths と on.push.branch の && は利用できないため回避策
+    if: github.ref == 'refs/heads/main'
     outputs:
 #      output1: ${{ steps.step1.outputs.test }}
 #      output2: ${{ steps.step2.outputs.test }}
