@@ -215,6 +215,12 @@ jobs:
         run: |
           echo "::set-output name=status_azure_deploy::$(<pass_status_azure_deploy/status_azure_deploy.txt)"
 
+      - name: failure_step
+        run: |
+          if [ steps.azure_deploy.outputs.set_outputs == failure ]; then
+            exit 1
+          fi
+          
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
