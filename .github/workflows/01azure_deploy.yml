@@ -204,7 +204,9 @@ jobs:
       #  uses: technote-space/workflow-conclusion-action@v2
       #- run: |
       #    echo "show the workflow conclusion"
-      #    echo ${{ env.WORKFLOW_CONCLUSION }}
+      #    echo ${{ env.WORKFLOW_CONCLUSION }}W
+      - uses: actions/checkout@master
+
       - name: Download artifact pass_status_azure_deploy
         uses: actions/download-artifact@v1
         with:
@@ -226,7 +228,6 @@ jobs:
         env:
           steps.azure_deploy.outputs.set_outputs: ${{ steps.azure_deploy.outputs.set_outputs }}
           
-      - uses: actions/checkout@master
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
         #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
