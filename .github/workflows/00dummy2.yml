@@ -15,21 +15,17 @@ jobs:
         uses: actions/checkout@master
       - run: |
           WORKFLOW_CONCLUSIONasdasdasd
-
-  testjob:
-    name: testjob
-    runs-on: ubuntu-latest
-    needs: testjob0
-    steps:
+        # job azure_deploy の結果を得る
       - name: Getting azure_deploy result
-        uses: actions/checkout@master
+        uses: technote-space/workflow-conclusion-action@v2
       - run: |
-          WORKFLOW_CONCLUSION="failure"
+          echo "env.WORKFLOW_CONCLUSION"
+          echo ${{ env.WORKFLOW_CONCLUSION }}
           
   success:
     name: pbs-success_teams_notification
     runs-on: ubuntu-18.04
-    needs: [testjob]
+    needs: [testjob0]
     steps:
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
@@ -51,14 +47,8 @@ jobs:
     # 失敗の場合、通知送付
     if: always() # set always
     steps:
-      # job azure_deploy の結果を得る
-      - name: Getting azure_deploy result
-        uses: technote-space/workflow-conclusion-action@v2
-      - run: |
-          echo "env.WORKFLOW_CONCLUSION"
-          echo ${{ env.WORKFLOW_CONCLUSION }}
-      - uses: actions/checkout@master
       - name: Microsoft Teams Notification
+        uses: actions/checkout@master
         uses: skitionek/notify-microsoft-teams@master
         if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
         #if: ${{ failure() }}
