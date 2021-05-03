@@ -181,10 +181,20 @@ jobs:
           labels: 01done
           repo: github.event.issue.number = ${{ steps.cardid.outputs.issue.number }}
 
+  dummy:
+    name: dummy
+    runs-on: ubuntu-latest
+    needs: azure_deploy
+    steps:
+      - name: dummy
+        uses: actions/download-artifact@v1
+        run: |
+          uname
+
   if_failure:
     name: azure_deploy-failure_teams_notification
     runs-on: ubuntu-18.04
-    if: always()
+    needs: dummy
     steps:
       # job azure_deploy の結果を得る
       #- name: Getting azure_deploy result
