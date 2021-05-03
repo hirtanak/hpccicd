@@ -157,7 +157,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Getting azure_deploy result
-        uses: technote-space/workflow-conclusion-action@v2
+        uses: actions/checkout@master
       - run: |
           WORKFLOW_CONCLUSION="failure"
 
@@ -167,7 +167,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Getting azure_deploy result
-        uses: technote-space/workflow-conclusion-action@v2
+        uses: actions/checkout@master
       - run: |
           WORKFLOW_CONCLUSIONasdasdas
           
