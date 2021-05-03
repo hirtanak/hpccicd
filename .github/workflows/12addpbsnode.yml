@@ -1,10 +1,10 @@
 name: 12addpbsnode
 on:
-#  workflow_run:
-#    workflows: ["01azure_deploy"]
-#    branches: [main]
-#    types:
-#      - completed
+  workflow_run:
+    workflows: ["01azure_deploy"]
+    branches: [main]
+    types:
+      - completed
   push:
     paths:
       - senarios/pbsdeploy
@@ -178,7 +178,7 @@ jobs:
           path: status_pbs_config.txt
           
   success:
-    name: pbs-success_teams_notification
+    name: pbs_deploy-success_teams_notification
     runs-on: ubuntu-18.04
     needs: [pbs_deploy]
     steps:
@@ -242,7 +242,7 @@ jobs:
           dry_run: False
 
   success2:
-    name: pbs-success_teams_notification
+    name: pbs_configure-success_teams_notification
     runs-on: ubuntu-18.04
     needs: [pbs_configure]
     steps:
@@ -271,7 +271,7 @@ jobs:
         run: uname -a
 
   deploy_failure2:
-    name: pbs_deploy-failure_teams_notification
+    name: pbs_configure-failure_teams_notification
     runs-on: ubuntu-latest
     needs: setup_failure2
     if: always()
@@ -288,8 +288,8 @@ jobs:
       - name: Set the statuses of pbs_configure as output parameters
         id: set_outputs_pbs2
         run: |
-          echo "::set-output name=status_pbs_config::$(<pass_status_azure_deploy/status_pbs_config.txt)"
-          echo "::set-output name=pass_status_pbs_config::$(<pass_status_azure_deploy/status_pbs_config.txt)"
+          echo "::set-output name=status_pbs_config::$(<pass_status_pbs_config/status_pbs_config.txt)"
+          echo "::set-output name=pass_status_pbs_config::$(<pass_status_pbs_config/status_pbs_config.txt)"
       - name: check_failure - pbs_configure
         if: steps.set_outputs_pbs2.outputs.status_pbs_config == 'failure'
         run: |
