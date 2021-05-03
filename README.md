@@ -23,14 +23,7 @@ HPC環境作成の自動化・管理・アプリケーション管理の自動�
 
 ### App2:
 
-#### depreciated
-[![02check_deploy](https://github.com/hirtanak/hpccicd/actions/workflows/02check_deploy.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/02check_deploy.yml)
-[![03azure_cleanup-s](https://github.com/hirtanak/hpccicd/actions/workflows/03azure_cleanup-s.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/03azure_cleanup-s.yml) [![03azure_cleanup-f](https://github.com/hirtanak/hpccicd/actions/workflows/03azure_cleanup-f.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/03azure_cleanup-f.yml) [![04azure_status](https://github.com/hirtanak/hpccicd/actions/workflows/04azure_status.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/04azure_status.yml)
-
-#### depreciated2
-[![13pbssetting](https://github.com/hirtanak/hpccicd/actions/workflows/13pbssetting.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/13pbssetting.yml): PBS設定
-
-#### depreciated3
+#### depreciated workflow
 [![91creatingissues](https://github.com/hirtanak/hpccicd/actions/workflows/91creatingissues.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/91creatingissues.yml) : テスト(issue)自動生成 
 
 [![93makepingpongresult](https://github.com/hirtanak/hpccicd/actions/workflows/93makepingpongresult.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/93makepingpongresult.yml) : MPI pingpong の結果表示
