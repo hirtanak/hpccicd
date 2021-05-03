@@ -1,0 +1,72 @@
+name: 00dummy
+on:
+  push:
+    branches: [main]
+    paths:
+      - senarios/test
+
+jobs:
+  testjob0:
+    name: testjob0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Getting azure_deploy result
+        id: jobid
+        uses: actions/checkout@master
+      - run: |
+          WORKFLOW_CONCLUSIONasdasdasd
+
+  testjob:
+    name: testjob
+    runs-on: ubuntu-latest
+    needs: testjob0
+    steps:
+      - name: Getting azure_deploy result
+        uses: actions/checkout@master
+      - run: |
+          WORKFLOW_CONCLUSION="failure"
+          
+  success:
+    name: pbs-success_teams_notification
+    runs-on: ubuntu-18.04
+    needs: [testjob]
+    steps:
+      - uses: actions/checkout@master
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        if: env.WORKFLOW_CONCLUSION == 'success' # notify only if failure
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          dry_run: False
+      - name: sucuess! 
+        run: |
+          echo '::success::Previous workflow was sucuess!'
+
+  if_failure:
+    name: pbs-failure_teams_notification
+    runs-on: ubuntu-18.04
+    # 失敗の場合、通知送付
+    if: always() # set always
+    steps:
+      # job azure_deploy の結果を得る
+      - name: Getting azure_deploy result
+        uses: technote-space/workflow-conclusion-action@v2
+      - run: |
+          echo "env.WORKFLOW_CONCLUSION"
+          echo ${{ env.WORKFLOW_CONCLUSION }}
+      - uses: actions/checkout@master
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
+        #if: ${{ failure() }}
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}        
+          dry_run: False
+        env: 
+          WORKFLOW_CONCLUSION: ${{ env.WORKFLOW_CONCLUSION }}

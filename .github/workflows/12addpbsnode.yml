@@ -215,4 +215,4 @@ jobs:
           steps: ${{ toJson(steps) }}        
           dry_run: False
         env: 
-          env.WORKFLOW_CONCLUSION: ${{ env.WORKFLOW_CONCLUSION }}
+          WORKFLOW_CONCLUSION: ${{ env.WORKFLOW_CONCLUSION }}
