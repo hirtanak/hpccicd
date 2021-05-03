@@ -69,6 +69,8 @@ jobs:
           echo "RG: ${MyResourceGroup}"
           echo "VMPREFIX: ${VMPREFIX}"
 
+          exit 1
+
           # check environment
           uname -a
           cat /etc/debian_version
@@ -88,9 +90,6 @@ jobs:
           SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
-          pwd
-          ls
-
           # 設定ファイル変更反映
           bash ./setupcreds.sh hpcbmtenv.sh
 
@@ -177,9 +176,9 @@ jobs:
     steps:
       # job azure_deploy の結果を得る
       - name: Getting azure_deploy result
-        uses: technote-space/workflow-conclusion-action@v1
+        uses: technote-space/workflow-conclusion-action@v2
       - run: |
-          echo "let's see the workflow conclusion"
+          echo "show the workflow conclusion"
           echo ${{ env.WORKFLOW_CONCLUSION }}
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification

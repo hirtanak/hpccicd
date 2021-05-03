@@ -8,6 +8,8 @@ on:
 jobs:
   openfoam_bmttest1:
     runs-on: ubuntu-latest
+    # on.push.paths と on.push.branch の && は利用できないため回避策
+    if: github.ref == 'refs/heads/main'
     env:
       MyResourceGroup: tmcbmgt01-hpccicd01
       VMPREFIX: hpccicd01

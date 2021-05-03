@@ -1319,14 +1319,9 @@ cp /home/$USER/* /mnt/resource/
 cd /mnt/resource/
 max=$(cat ./pingponglist | wc -l)
 count=1
-<<<<<<< HEAD
-echo "========================================================================"
-echo -n "$(TZ=-9 date '+%Y %b %d %a %H:%M JST')" && echo " - pingpong #: $max, OS: ${checkosver}"
-=======
 ## TZ=-9 date
 echo "========================================================================"
 echo -n "$(date '+%Y %b %d %a %H:%M JST')" && echo " - pingpong #: $max, OS: ${checkosver}"
->>>>>>> 5345ec5272408a8cc926b3440d75031f97f1fbc3
 echo "========================================================================"
 # run pingpong
 case $checkosver in
