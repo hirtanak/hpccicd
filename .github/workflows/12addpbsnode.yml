@@ -160,11 +160,20 @@ jobs:
         uses: technote-space/workflow-conclusion-action@v2
       - run: |
           WORKFLOW_CONCLUSION="failure"
+
+  testjob2:
+    name: testjob2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Getting azure_deploy result
+        uses: technote-space/workflow-conclusion-action@v2
+      - run: |
+          WORKFLOW_CONCLUSIONasdasdas
           
   success:
     name: pbs-success_teams_notification
     runs-on: ubuntu-18.04
-    needs: [testjob]
+    needs: [testjob2]
     steps:
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
