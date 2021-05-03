@@ -204,7 +204,7 @@ jobs:
       #value: ${{ steps.set_outputs.outputs.status_azure_deploy }}
       STATUS_AZURE_DEPLOY:
       description: "status_azure_deploy"
-      value: ${{ steps.set_outputs.outputs.status_azure_deploy }
+      value: ${{ steps.set_outputs.outputs.status_azure_deploy }}
     steps:
       # job azure_deploy の結果を得る
       #- name: Getting azure_deploy result
