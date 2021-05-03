@@ -154,7 +154,6 @@ jobs:
 
   testjob0:
     name: testjob0
-    needs: testjob
     runs-on: ubuntu-latest
     steps:
       - name: Getting azure_deploy result
