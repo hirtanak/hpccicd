@@ -64,8 +64,6 @@ jobs:
           echo "$SSH_SECRET_KEY" > ./${VMPREFIX}
           md5sum ./${VMPREFIX}
 
-          exit 1
-
           # SSH公開鍵の設定
           echo "setting ssh public key...."
           echo "$SSH_PUBLIC_KEY" > ./${VMPREFIX}.pub
@@ -140,7 +138,7 @@ jobs:
           name: pass_status_pingpong
           path: status_pingpong.txt
 
-  websitebuilddeploy:
+  website_build-deploy:
     runs-on: ubuntu-latest
     needs: pingpong
     #if: "!contains(github.event.head_commit.message, 'auto rebuilding site')"
