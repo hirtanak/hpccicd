@@ -8,18 +8,18 @@ echo "In compile.sh - OPENFOAM_VERSION : $OPENFOAM_VERSION"
 echo "In compile.sh - HOMEDIR : $HOMEDIR"
 echo "In compile.sh - CUSER : $CUSER"
 
-cd $PBS_O_WORKDIR
+cd "$PBS_O_WORKDIR" || exit
 ./install.sh
 
-if [ ! -z $OPENFOAM_VERSION ]; then
-  if [ $OPENFOAM_VERSION = "v1712" ]; then
+if [ -n "$OPENFOAM_VERSION" ]; then
+  if [ "$OPENFOAM_VERSION" = "v1712" ]; then
     echo "In compile.sh - IN FOR v1712 SPEFIC PROCESSING"
-    cp $HOMEDIR/OpenFOAM/$CUSER-v1712/platforms/linux64Gcc4_8_5DPInt32Opt/bin/sphereSurfactantFoam /mnt/exports/apps/OpenFOAM/OpenFOAM-v1712/platforms/linux64Gcc
+    cp "$HOMEDIR"/OpenFOAM/"$CUSER"-v1712/platforms/linux64Gcc4_8_5DPInt32Opt/bin/sphereSurfactantFoam /mnt/exports/apps/OpenFOAM/OpenFOAM-v1712/platforms/linux64Gcc
 4_8_5DPInt32Opt/bin
-    \rm -rf $HOMEDIR/OpenFOAM
+    \rm -rf "$HOMEDIR"/OpenFOAM
   fi
-  if [ -d /mnt/exports/apps/OpenFOAM/OpenFOAM-$OPENFOAM_VERSION/platforms -a -w /mnt/exports/apps/OpenFOAM/OpenFOAM-$OPENFOAM_VERSION/platforms ]; then
-    cd /mnt/exports/apps/OpenFOAM/OpenFOAM-$OPENFOAM_VERSION/platforms
+  if [ -d /mnt/exports/apps/OpenFOAM/OpenFOAM-"$OPENFOAM_VERSION"/platforms ] && [ -w /mnt/exports/apps/OpenFOAM/OpenFOAM-"$OPENFOAM_VERSION"/platforms ]; then
+    cd /mnt/exports/apps/OpenFOAM/OpenFOAM-"$OPENFOAM_VERSION"/platforms || exit
     echo "In compile.sh - LINKDIR : $(pwd)"
     ln -s linux64Gcc4_8_5DPInt32Opt linux64GccDPInt32Opt
   fi
