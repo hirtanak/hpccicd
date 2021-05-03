@@ -69,7 +69,7 @@ jobs:
           grep "MyResourceGroup=" ./hpcbmtenv.sh | head -n 1
           grep "VMPREFIX=" ./hpcbmtenv.sh | head -n 1
           grep "MAXVM=" ./hpcbmtenv.sh | head -n 1
-          grep "azure_*" ./hpcbmtenv.sh  | head -n 3
+          grep "azure_*" ./hpcbmtenv.sh  | head -n 2
 
           # クルデンシャル
           sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./hpcbmtenv.sh
@@ -96,8 +96,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: pbs_deploy
     # 呼び元のworkflowの結果が success であればジョブを実行
-    # 12addpbsnode が成功すれば 13pbssetting を実施する
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # 12addpbsnode が成功すれば pbs_confogure を実施する
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     env:
       MyResourceGroup: tmcbmgt01-hpccicd01
       VMPREFIX: hpccicd01
@@ -137,7 +137,7 @@ jobs:
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
           # 設定ファイル変更反映
-          bash ./setupcreds.sh hpcbmtenv.sh
+          bash ./setupcreds.sh pbssetting.sh
 
           # SSH秘密鍵の設定
           echo "setting ssh private key...."
@@ -152,7 +152,7 @@ jobs:
           grep "MyResourceGroup=" ./pbssetting.sh | head -n 1
           grep "VMPREFIX=" ./pbssetting.sh | head -n 1
           grep "MAXVM=" ./pbssetting.sh | head -n 1
-          grep "azure_*" ./pbssetting.sh  | head -n 3
+          grep "azure_*" ./pbssetting.sh  | head -n 2
 
           # クルデンシャル
           sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./pbssetting.sh

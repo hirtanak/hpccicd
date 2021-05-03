@@ -16,7 +16,6 @@ echo "SSHKEYDIR: $SSHKEYDIR"
 #azure_name="uuid"
 #azure_password="uuid"
 #azure_tenant="uuid"
-
 az login --service-principal --username ${azure_name} --password ${azure_password} --tenant ${azure_tenant} --output none
 
 # コマンド名取得
@@ -52,7 +51,7 @@ fi
 
 # SSHアクセスチェック
 unset checkssh
-checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i ${SSHKEYDIR} -t $USERNAME@${pbsvmip} "uname")
+checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i ${SSHKEYDIR} -t $USERNAME@"${pbsvmip}" "uname")
 if [ -z "$checkssh" ]; then
 	echo "can not access ${VMPREFIX}-pbs by ssh"
 	exit 1

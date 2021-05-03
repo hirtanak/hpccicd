@@ -26,8 +26,3 @@ if [ -n "$OPENFOAM_VERSION" ]; then
 else
   echo "In compile.sh - OPENFOAM_VERSION is not specified."
 fi
-
-#if [ -d /mnt/exports/apps/OpenFOAM/workdir -a -w /mnt/exports/apps/OpenFOAM/workdir ]; then
-#  echo "rm -rf /mnt/exports/apps/OpenFOAM/workdir"
-#  \rm -rf /mnt/exports/apps/OpenFOAM/workdir
-#fi
