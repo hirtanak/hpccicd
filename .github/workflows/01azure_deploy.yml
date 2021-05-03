@@ -224,7 +224,7 @@ jobs:
       - name: check_failure
         run:        
           if [ pass_status_azure_deploy == failure ]; then
-            echo '::error::azure_deploy was failed' && exit 1
+            exit 1
           fi
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
