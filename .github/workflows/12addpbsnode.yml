@@ -97,7 +97,8 @@ jobs:
     needs: pbs_deploy
     # 呼び元のworkflowの結果が success であればジョブを実行
     # 12addpbsnode が成功すれば pbs_confogure を実施する
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: pbs_deploy
     env:
       MyResourceGroup: tmcbmgt01-hpccicd01
       VMPREFIX: hpccicd01
