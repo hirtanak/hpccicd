@@ -220,16 +220,15 @@ jobs:
         id: set_outputs
         run: |
           echo "::set-output name=status_azure_deploy::$(<pass_status_azure_deploy/status_azure_deploy.txt)"
-          echo ${status_azure_deploy}
-          echo ${steps.azure_deploy.outputs.set_outputs}
           if [ steps.azure_deploy.outputs.set_outputs == failure ]; then
             exit 1
           fi
           if [ status_azure_deploy == failure ]; then
+            echo '::error::azure_deploy was failed'
             exit 1
           fi
-        #env:
-          #steps.azure_deploy.outputs.set_outputs: ${{ steps.azure_deploy.outputs.set_outputs }}
+        env:
+          status_azure_deploy: ${{ steps.azure_deploy.outputs.set_outputs }}
           
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
@@ -241,7 +240,3 @@ jobs:
           job: ${{ toJson(job) }}
           steps: ${{ toJson(steps) }}        
           dry_run: False
-      - name: make an error
-        #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
-        run: |
-          echo '::error::Previous workflow was failed'
