@@ -1,10 +1,10 @@
 name: 12addpbsnode
 on:
-  workflow_run:
-    workflows: ["01azure_deploy"]
-    branches: [main]
-    types:
-      - completed
+#  workflow_run:
+#    workflows: ["01azure_deploy"]
+#    branches: [main]
+#    types:
+#      - completed
   push:
     paths:
       - senarios/pbsdeploy
