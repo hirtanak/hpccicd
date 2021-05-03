@@ -160,7 +160,7 @@ jobs:
         id: jobid
         uses: actions/checkout@master
       - run: |
-          WORKFLOW_CONCLUSIONasdasdas
+          WORKFLOW_CONCLUSION="failure"
 
   testjob:
     name: testjob
