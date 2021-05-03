@@ -194,8 +194,7 @@ jobs:
     name: pbs-failure_teams_notification
     runs-on: ubuntu-18.04
     # 失敗の場合、通知送付
-    #if: always() # set always
-    needs: testjob2
+    if: always() # set always
     steps:
       # job azure_deploy の結果を得る
       - name: Getting azure_deploy result
@@ -207,7 +206,7 @@ jobs:
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
         #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
-        if: failure()
+        if: ${{ failure() }}
         with:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
           needs: ${{ toJson(needs) }}
