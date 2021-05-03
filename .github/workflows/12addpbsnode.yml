@@ -34,8 +34,6 @@ jobs:
           echo "RG: ${MyResourceGroup}"
           echo "VMPREFIX: ${VMPREFIX}"
 
-          exit 1
-
           # check environment
           uname -a
           cat /etc/debian_version
