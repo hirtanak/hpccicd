@@ -48,7 +48,6 @@ jobs:
     if: always() # set always
     steps:
       - name: Microsoft Teams Notification
-        uses: actions/checkout@master
         uses: skitionek/notify-microsoft-teams@master
         if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
         #if: ${{ failure() }}
