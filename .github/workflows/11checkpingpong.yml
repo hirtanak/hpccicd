@@ -259,9 +259,9 @@ jobs:
           echo "::set-output name=status_pingpong::$(<pass_status_pingpong/status_pingpong.txt)"
           echo "::set-output name=pass_status_pingpong::$(<pass_status_pingpong/status_pingpong.txt)"
       - name: check_failure
-        if: steps.set_outputs_pbs.outputs.status_pingpong == 'failure'
+        if: steps.set_outputs_pingpong.outputs.status_pingpong == 'failure'
         run: |
-            echo "steps.set_outputs_pbs.outputs.status_pingpong: ${{ steps.set_outputs_pingpong.outputs.status_pingpong }}"
+            echo "steps.set_outputs_pingpong.outputs.status_pingpong: ${{ steps.set_outputs_pingpong.outputs.status_pingpong }}"
             exit 1
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
