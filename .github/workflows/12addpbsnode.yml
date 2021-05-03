@@ -205,7 +205,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
-        if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
+        #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
+        if: job.steps.testjob2.status == failure()
         #if: ${{ failure() }}
         with:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
