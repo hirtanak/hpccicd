@@ -224,8 +224,7 @@ jobs:
           echo "pass_status_azure_deploy: $pass_status_azure_deploy"
       - name: check_failure
         run:        
-            if [ pass_status_azure_deploy == failure ]; then exit 1; fi
-            if [ status_azure_deploy == failure ]; then exit 1; fi 
+            if [ pass_status_azure_deploy == failure ]; then exit 1; fi || if [ status_azure_deploy == failure ]; then exit 1; fi 
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
         #if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
