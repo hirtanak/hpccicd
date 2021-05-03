@@ -7,7 +7,7 @@ BMTCONF=$1
 if [ -z "${BMTCONF}" ]; then
 	BMTCONF="20210425-bmtconf-01"
 fi
-OPENFORM_VERSION=v1906
+OPENFORM_VERSION="v1906"
 
 MyResourceGroup=tmcbmt01-hpccicd01
 VMPREFIX=hpccicd01

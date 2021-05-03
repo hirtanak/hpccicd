@@ -1,3 +1,4 @@
+#!/bin/bash
 #PBS -q workq
 #PBS -j oe
 #PBS -l select=2:ncpus=60
@@ -5,7 +6,7 @@
 APPDIR=/mnt/share
 VERSION=v1906
 
-cd ${PBS_O_WORKDIR}
+cd "${PBS_O_WORKDIR}" || exit
 
 #source /opt/intel/impi/2018.4.274/intel64/bin/mpivars.sh
 source $APPDIR/OpenFOAM/OpenFOAM-$VERSION/etc/bashrc
