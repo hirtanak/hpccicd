@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     # 呼び元のworkflowの結果が success であればジョブを実行
     # 11checkpingpong が成功すれば 12addpbsnode を実施する
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     env:
       MyResourceGroup: tmcbmgt01-hpccicd01
       VMPREFIX: hpccicd01
@@ -180,7 +180,7 @@ jobs:
   success:
     name: pbs-success_teams_notification
     runs-on: ubuntu-18.04
-    needs: [pbs_configure]
+    needs: [pbs_deploy]
     steps:
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
@@ -194,7 +194,7 @@ jobs:
           dry_run: False
       - name: sucuess! 
         run: |
-          echo '::success::Previous workflow was sucuess!'
+          echo '::success::pbs_deploy was sucuess!'
 
   setup_failure:
     name: setup_failure
@@ -240,6 +240,25 @@ jobs:
           job: ${{ toJson(job) }}
           steps: ${{ toJson(steps) }}        
           dry_run: False
+
+  success2:
+    name: pbs-success_teams_notification
+    runs-on: ubuntu-18.04
+    needs: [pbs_configure]
+    steps:
+      - uses: actions/checkout@master
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        if: env.WORKFLOW_CONCLUSION == 'success' # notify only if failure
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          dry_run: False
+      - name: sucuess! 
+        run: |
+          echo '::success::pbs_configure was sucuess!'
 
   setup_failure2:
     name: setup_failure
