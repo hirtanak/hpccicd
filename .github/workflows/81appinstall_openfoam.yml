@@ -71,7 +71,7 @@ jobs:
           grep "MyResourceGroup=" ./apps/openfoam/installopenfoam-v1.sh | head -n 1
           grep "VMPREFIX=" ./apps/openfoam/installopenfoam-v1.sh | head -n 1
           grep "MAXVM=" ./apps/openfoam/installopenfoam-v1.sh | head -n 1
-          grep "azure_*" ./apps/openfoam/installopenfoam-v1.sh  | head -n 3
+          grep "azure_*" ./apps/openfoam/installopenfoam-v1.sh  | head -n 2
          
           sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./hpcbmtenv.sh
           sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./hpcbmtenv.sh

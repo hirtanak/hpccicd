@@ -1509,15 +1509,17 @@ EOL
 			if [ -z "$diskformat3" ]; then
 				# /dev/sdc1が存在しない場合のみ実施
 				# リモートの /dev/sdc が未フォーマットであるか
-				disktype1=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo fdisk -l /dev/sdc | grep 'Disk label typ'")
+				disktype1=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo fdisk -l /dev/sdc | grep 'Disk label type'")
 				disktype2=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo fdisk -l /dev/sdc | grep 'Disk identifier'")
 				# どちらも存在しない場合、フォーマット処理	
-				if [ -z "$disktype1" ] && [ -z "$disktype2" ] ; then 
+				if [[ -z "$disktype1" ]] || [[ -z "$disktype2" ]] ; then 
 					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo parted /dev/sdc --script mklabel gpt mkpart xfspart xfs 0% 100%"
 					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo mkfs.xfs /dev/sdc1"
 					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo partprobe /dev/sdc1"
 				fi
-			fi			
+			fi
+			else
+				echo "your pbs node has not the device."
 		fi
 		echo "pbsnode: fromatted a new disk."
 		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "df | grep sdc1"
@@ -1601,7 +1603,7 @@ EOL
 		# PBSノード：インストール準備
 		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo yum install --quiet -y md5sum"
 		# ローカル：openPBSバイナリダウンロード
-		# CentOS バージョンチェック
+		# PBSノード：CentOS バージョンチェック
 		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "cat /etc/redhat-release" > centosversion
 		centosversion=$(cut -d " " -f 4 ./centosversion)
 		# CentOS 7.x か 8.xか判別する
