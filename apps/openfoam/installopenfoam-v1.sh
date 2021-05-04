@@ -4,8 +4,8 @@ echo "BUILD: try openfoam build...."
 # 引数1：OpenFOAMのバージョン
 OPENFOAM_VERSION=$1
 
-MyResourceGroup=tmcbmt01-hpccicd01
-VMPREFIX=hpccicd01
+MyResourceGroup=tmcbmt01
+VMPREFIX=tmcbmt01
 USERNAME=azureuser # ユーザ名: デフォルト azureuser
 # SSH公開鍵ファイルを指定：デフォルトではカレントディレクトリを利用する
 #SSHKEYFILE="./${VMPREFIX}.pub"

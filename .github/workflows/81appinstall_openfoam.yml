@@ -57,7 +57,8 @@ jobs:
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
           echo "applying setupcreds.sh..."
-          bash ./setupcreds.sh installopenfoam-v1.sh
+          bash ./setupcreds.sh hpcbmtenv.sh
+          bash ./setupcreds.sh apps/openfoam/installopenfoam-v1.sh
 
           echo "setting ssh private key...."
           echo "$SSH_SECRET_KEY" > ./${VMPREFIX}
@@ -72,9 +73,13 @@ jobs:
           grep "MAXVM=" ./apps/openfoam/installopenfoam-v1.sh | head -n 1
           grep "azure_*" ./apps/openfoam/installopenfoam-v1.sh  | head -n 3
          
+          sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./hpcbmtenv.sh
+          sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./hpcbmtenv.sh
+          sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./hpcbmtenv.sh
           sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./apps/openfoam/installopenfoam-v1.sh
           sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./apps/openfoam/installopenfoam-v1.sh
           sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./apps/openfoam/installopenfoam-v1.sh
 
+          bash ./hpcbmtenv.sh updatensg     
           # 引数1: OpenFOAMバージョン
           bash ./apps/openfoam/installopenfoam-v1.sh v1906
