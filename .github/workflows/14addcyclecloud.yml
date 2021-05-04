@@ -61,7 +61,7 @@ jobs:
           # 設定ファイル変更反映: addcyclecloud.shの場合、hpcbmtenv.sh, addcyclecloud.sh, cyc.sh 3つ必要
           bash ./setupcreds.sh hpcbmtenv.sh
           bash ./setupcreds.sh addcyclecloud.sh
-          bash ./setupcreds.sh cyeclesetting.sh
+          bash ./setupcreds.sh cyclesetting.sh
 
           # SSH秘密鍵の設定
           echo "setting ssh private key...."
@@ -84,16 +84,16 @@ jobs:
           sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./addcyclecloud.sh
           sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./addcyclecloud.sh
           sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./addcyclecloud.sh
-          sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./cyeclesetting.sh
-          sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./cyeclesetting.sh
-          sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./cyeclesetting.sh
+          sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./cyclesetting.sh
+          sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./cyclesetting.sh
+          sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./cyclesetting.sh
 
           # Update NSG
           bash ./hpcbmtenv.sh updatensg
           # Azure CycleCloud構築
-          echo "create cyeclecloud..."
+          echo "create cyclecloud..."
           bash ./addcyclecloud.sh
-          echo "postinstall cyelecloud setting..."
+          echo "postinstall cyclecloud setting..."
           bash ./cyclesetting.sh
 
       - name: Create file status_cyclecloud.txt and write the job status into it
