@@ -136,7 +136,8 @@ jobs:
           SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
-          # 設定ファイル変更反映
+          # 設定ファイル変更反映: pbs_configureの場合、hpcbmtenv.sh, pbssetting.sh 両方必要
+          bash ./setupcreds.sh hpcbmtenv.sh
           bash ./setupcreds.sh pbssetting.sh
 
           # SSH秘密鍵の設定
