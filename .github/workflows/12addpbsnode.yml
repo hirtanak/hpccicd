@@ -184,7 +184,6 @@ jobs:
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
-        if: env.WORKFLOW_CONCLUSION == 'success' # notify only if failure
         with:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
           needs: ${{ toJson(needs) }}
@@ -248,7 +247,6 @@ jobs:
       - uses: actions/checkout@master
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
-        if: env.WORKFLOW_CONCLUSION == 'success' # notify only if failure
         with:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
           needs: ${{ toJson(needs) }}

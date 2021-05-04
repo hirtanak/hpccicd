@@ -1,5 +1,10 @@
 name: 14addcyclecloud
 on:
+  workflow_run:
+    workflows: ["12addpbsnode"]
+    branches: [main]
+    types:
+      - completed
   push:
     paths:
       - senarios/cyclecloud
@@ -53,9 +58,10 @@ jobs:
           SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
-          # 設定ファイル変更反映: addcyclecloud.shの場合、hpcbmtenv.sh, addcyclecloud.sh 両方必要
+          # 設定ファイル変更反映: addcyclecloud.shの場合、hpcbmtenv.sh, addcyclecloud.sh, cyc.sh 3つ必要
           bash ./setupcreds.sh hpcbmtenv.sh
           bash ./setupcreds.sh addcyclecloud.sh
+          bash ./setupcreds.sh cyeclesetting.sh
 
           # SSH秘密鍵の設定
           echo "setting ssh private key...."
@@ -78,6 +84,9 @@ jobs:
           sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./addcyclecloud.sh
           sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./addcyclecloud.sh
           sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./addcyclecloud.sh
+          sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./cyeclesetting.sh
+          sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./cyeclesetting.sh
+          sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./cyeclesetting.sh
 
           # Update NSG
           bash ./hpcbmtenv.sh updatensg
@@ -85,4 +94,79 @@ jobs:
           echo "create cyeclecloud..."
           bash ./addcyclecloud.sh
           echo "postinstall cyelecloud setting..."
-          bash ./cyeclesetting.sh
+          bash ./cyclesetting.sh
+
+      - name: Create file status_cyclecloud.txt and write the job status into it
+        if: always()
+        run: |
+          echo ${{ job.status }} > status_cyclecloud.txt
+
+      - name: Upload file status_cyclecloud.txt as an artifact
+        if: always()
+        uses: actions/upload-artifact@v1
+        with:
+          name: pass_status_cyclecloud
+          path: status_cyclecloud.txt
+
+  success:
+    name: cyclecloud-success_teams_notification
+    runs-on: ubuntu-18.04
+    needs: [cyclecloud_deploy]
+    steps:
+      - uses: actions/checkout@master
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          dry_run: False
+      - name: sucuess! 
+        run: |
+          echo '::success::cyclecloud_deploy(and config) was sucuess!'
+
+  setup_failure:
+    name: setup_failure
+    runs-on: ubuntu-latest
+    needs: cyclecloud_deploy
+    steps:
+      - name: setup_failure
+        uses: actions/checkout@v2
+      - name: dummy
+        run: uname -a
+
+  deploy_failure:
+    name: cyclecloud-failure_teams_notification
+    runs-on: ubuntu-latest
+    needs: setup_failure
+    if: always()
+    outputs:
+      status_cyclecloud: ${{ steps.set_outputs_cyclecloud.outputs.status_cyclecloud }}
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Download artifact pass_status_cyclecloud
+        uses: actions/download-artifact@v1
+        with:
+          name: pass_status_cyclecloud
+
+      - name: Set the statuses of cyclecloud as output parameters
+        id: set_outputs_cyclecloud
+        run: |
+          echo "::set-output name=status_cyclecloud::$(<pass_status_cyclecloud/status_cyclecloud.txt)"
+          echo "::set-output name=pass_status_cyclecloud::$(<pass_status_cyclecloud/status_cyclecloud.txt)"
+      - name: check_failure
+        if: steps.set_outputs_cyclecloud.outputs.status_cyclecloud == 'failure'
+        run: |
+            echo "steps.set_outputs_cyclecloud.outputs.status_cyclecloud: ${{ steps.set_outputs_cyclecloud.outputs.status_cyclecloud }}"
+            exit 1
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        if: failure()
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}        
+          dry_run: False

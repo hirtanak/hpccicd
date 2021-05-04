@@ -15,8 +15,7 @@ MySubNetwork=compute
 ACCELERATEDNETWORKING="--accelerated-networking true" # もし問題がある場合にはNOで利用可能。コンピュートノードのみ対象 true/false
 MyNetworkSecurityGroup=${VMPREFIX}-nsg
 #IMAGE="OpenLogic:CentOS-HPC:7_8:latest" #Azure URNフォーマット。OpenLogic:CentOS-HPC:8_1:latest
-# ユーザ名: デフォルト azureuser
-USERNAME=azureuser
+USERNAME=azureuser # ユーザ名: デフォルト azureuser
 # SSH公開鍵ファイルを指定：デフォルトではカレントディレクトリを利用する
 SSHKEYFILE="./${VMPREFIX}.pub"
 TAG=${VMPREFIX}=$(date "+%Y%m%d")

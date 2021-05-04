@@ -5,8 +5,7 @@ CYCLECLOUDNAME=cyclecloud01
 
 MyResourceGroup=tmcbmt01
 VMPREFIX=tmcbmt01
-# ユーザ名: デフォルト azureuser
-USERNAME=azureuser
+USERNAME=azureuser # ユーザ名: デフォルト azureuser
 #SSHKEYFILE="./${VMPREFIX}.pub"
 SSHKEYDIR="./${VMPREFIX}"
 echo "SSHKEYDIR: $SSHKEYDIR"
