@@ -1514,8 +1514,8 @@ EOL
 		echo "diskformat2: $diskformat2"		
 		if [ -n "$diskformat2" ]; then
 			# かつ、 /dev/sdc1 が存在しない場合のみ実施
-			diskformat3=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo ls /dev/sdc1"; echo $?)
-			if [ $((diskformat3)) -ne 0 ]; then
+			diskformat3=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo ls /dev/sdc1")
+			if [[ $diskformat3 != "/dev/sdc1" ]]; then
 				# /dev/sdc1が存在しない (not 0)場合のみ実施
 				# リモートの /dev/sdc が未フォーマットであるか
 				disktype1=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo fdisk -l /dev/sdc | grep 'Disk label type'")
