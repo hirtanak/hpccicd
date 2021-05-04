@@ -1580,13 +1580,24 @@ EOL
 		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo systemctl start rpcbind && sudo systemctl start nfs-server"
 		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo systemctl enable rpcbind && sudo systemctl enable nfs-server"
 		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo showmount -e"
-		# PBSノード：NFSマウント設定
+		# コンピュートノード：NFSマウント設定
 		pbsmountip=$(az vm show -g $MyResourceGroup --name ${VMPREFIX}-pbs -d --query privateIps -otsv)
 		echo "pbsnode: mouting new directry on compute nodes: /mnt/share"
+		# for github actions
+		if [ -f ./ipaddresslist ]; then
+			# vmlist 作成
+			echo "creating ipaddresslist"
+			az vm list-ip-addresses -g $MyResourceGroup --query "[].virtualMachine[].{Name:name, PublicIp:network.publicIpAddresses[0].ipAddress}" -o tsv > tmpfile
+			# 自然番号順にソート
+			sort -V ./tmpfile > tmpfile2
+			# ipaddresslist 作成
+			cut -f 2 ./tmpfile2 > ipaddresslist
+			echo "ipaddresslist file contents"
+			cat ./ipaddresslist
+		fi
 		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mkdir -p /mnt/share""
 		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo chown $USERNAME:$USERNAME /mnt/share""
 		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mount -t nfs ${pbsmountip}:/mnt/share /mnt/share""
-
 		# PBSノード：インストール準備
 		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo yum install --quiet -y md5sum"
 		# ローカル：openPBSバイナリダウンロード
@@ -1780,14 +1791,6 @@ EOL
 		done
 		rm ./md5executionremote
 		rm ./md5executionremote2
-		# PBS向けNFSマウント
-		# PBSノード：マウント向けプライベートIPアドレス取得
-		pbsmountip=$(az vm show -g $MyResourceGroup --name ${VMPREFIX}-pbs -d --query privateIps -otsv)
-		echo "${VMPREFIX}-pbs's exports ip: $pbsmountip"
-		echo "${VMPREFIX}-1 to ${MAXVM}: mounting ${VMPREFIX}-pbs /mnt/share"
-		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mkdir -p /mnt/share""
-		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo chown $USERNAME:$USERNAME /mnt/share""
-		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mount -t nfs ${pbsmountip}:/mnt/share /mnt/share""
 		# openPBSクライアント：インストール
 		echo "confuguring all compute nodes"
 		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30'-i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo yum install --quiet -y hwloc-libs libICE libSM""
