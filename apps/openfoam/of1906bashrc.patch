@@ -1,16 +1,6 @@
 --- bashrc	2020-07-28 13:25:56.000000000 +0900
-<<<<<<< HEAD
-<<<<<<< HEAD
 +++ of1906bashrc	2021-04-23 14:30:50.213061300 +0900
 @@ -1,18 +1,18 @@
-=======
-+++ of1906bashrc	2021-04-23 12:46:45.236762100 +0900
-@@ -1,14 +1,14 @@
->>>>>>> 78eae87... OpenFOAM v1906 workflow update
-=======
-+++ of1906bashrc	2021-04-23 14:30:50.213061300 +0900
-@@ -1,18 +1,18 @@
->>>>>>> a532799... update v1906
  #!/bin/bash
  
  # OpenFOAM install directory
@@ -27,17 +17,8 @@
  
  # OpenFOAM version list to install
  OpenFOAM_BUILD_OPTION_LIST=(
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> a532799... update v1906
 -    OpenFOAM_VERSION=OpenFOAM-v1712,BUILD_PARAVIEW=0\
 +    OpenFOAM_VERSION=OpenFOAM-v1906,BUILD_PARAVIEW=0\
  ,COMPILER_TYPE=ThirdParty,COMPILER=Gcc4_8_5,MPLIB=OPENMPI\
  ,COMPILE_OPTION=Opt,ARCH_OPTION=64,PRECISION_OPTION=DP,LABEL_SIZE=32
  )
-<<<<<<< HEAD
-=======
->>>>>>> 78eae87... OpenFOAM v1906 workflow update
-=======
->>>>>>> a532799... update v1906
