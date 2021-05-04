@@ -1466,7 +1466,8 @@ EOL
 		echo "$pbsvmip" > ./pbsvmip
 		# 永続ディスクが必要な場合に設定可能
 		if [ $((PBSPERMANENTDISK)) -gt 0 ]; then
-			az vm disk attach --new -g $MyResourceGroup --size-gb $PBSPERMANENTDISK --sku Premium_LRS --vm-name ${VMPREFIX}-pbs --name ${VMPREFIX}-pbs-disk0 -o table &
+			az vm disk attach --new -g $MyResourceGroup --size-gb $PBSPERMANENTDISK --sku Premium_LRS --vm-name ${VMPREFIX}-pbs --name ${VMPREFIX}-pbs-disk0 -o table || \
+				az vm disk attach --new -g $MyResourceGroup --vm-name ${VMPREFIX}-pbs --name ${VMPREFIX}-pbs-disk0 -o table
 		fi
 		# SSHパスワードレスセッティング
 		echo "pbsnode: prparing passwordless settings"
