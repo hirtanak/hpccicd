@@ -1388,8 +1388,16 @@ EOL
 				loginprivateip=$(az vm show -g $MyResourceGroup --name ${VMPREFIX}-login -d --query privateIps -o tsv)
 				vm1privateip=$(az vm show -g $MyResourceGroup --name ${VMPREFIX}-1 -d --query privateIps -o tsv)
 				checkssh2=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "uname")
+				for cnt in $(seq 1 10); do
+					if [ -n "$checkssh2" ]; then
+						break
+					else
+						echo "sleep 10" && sleep 1
+					fi
+				done
 				if [ -z "$checkssh2" ]; then
 					echo "error!: you can not access by ssh the login node!"
+					exit 1
 				fi
 				# ファイル転送: local to login node
 				echo "ローカル: ssh: ホストファイル転送 transfer login node"
@@ -1506,9 +1514,9 @@ EOL
 		echo "diskformat2: $diskformat2"		
 		if [ -n "$diskformat2" ]; then
 			# かつ、 /dev/sdc1 が存在しない場合のみ実施
-			diskformat3=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo ls /dev/sdc1")
-			if [ -z "$diskformat3" ]; then
-				# /dev/sdc1が存在しない場合のみ実施
+			diskformat3=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo ls /dev/sdc1"; echo $?)
+			if [ $((diskformat3)) -ne 0 ]; then
+				# /dev/sdc1が存在しない (not 0)場合のみ実施
 				# リモートの /dev/sdc が未フォーマットであるか
 				disktype1=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo fdisk -l /dev/sdc | grep 'Disk label type'")
 				disktype2=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo fdisk -l /dev/sdc | grep 'Disk identifier'")

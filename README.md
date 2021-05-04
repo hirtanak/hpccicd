@@ -29,5 +29,3 @@ HPC環境作成の自動化・管理・アプリケーション管理の自動�
 [![93makepingpongresult](https://github.com/hirtanak/hpccicd/actions/workflows/93makepingpongresult.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/93makepingpongresult.yml) : MPI pingpong の結果表示
 
 [![94movecard](https://github.com/hirtanak/hpccicd/actions/workflows/94movecard.yml/badge.svg)](https://github.com/hirtanak/hpccicd/actions/workflows/94movecard.yml) : 
-
-

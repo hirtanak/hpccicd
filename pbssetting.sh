@@ -44,6 +44,13 @@ sudo apt-get install -qq -y parallel jq curl
 unset pbsvmip
 pbsvmip=$(az vm show -d -g $MyResourceGroup --name ${VMPREFIX}-pbs --query publicIps -o tsv)
 echo "accessing vm1: $pbsvmip"
+for count in $(seq 1 10); do
+	if [ -z "$pbsvmip" ]; then
+		echo "sleep 10" && sleep 10
+	else
+		echo "can not get ${VMPREFIX}-1 ip address"
+	fi
+done
 if [ -z "$pbsvmip" ]; then 
 	echo "can not get ${VMPREFIX}-1 ip address"
 	exit 1
@@ -52,6 +59,13 @@ fi
 # SSHアクセスチェック
 unset checkssh
 checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i ${SSHKEYDIR} -t $USERNAME@"${pbsvmip}" "uname")
+for count in $(seq 1 10); do
+	if [ -z "$checkssh" ]; then
+		echo "sleep 10" && sleep 10
+	else
+		break 
+	fi
+done
 if [ -z "$checkssh" ]; then
 	echo "can not access ${VMPREFIX}-pbs by ssh"
 	exit 1
