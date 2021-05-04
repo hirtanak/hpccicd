@@ -1780,9 +1780,17 @@ EOL
 		done
 		rm ./md5executionremote
 		rm ./md5executionremote2
+		# PBS向けNFSマウント
+		# PBSノード：マウント向けプライベートIPアドレス取得
+		pbsmountip=$(az vm show -g $MyResourceGroup --name ${VMPREFIX}-pbs -d --query privateIps -otsv)
+		echo "${VMPREFIX}-pbs's exports ip: $pbsmountip"
+		echo "${VMPREFIX}-1 to ${MAXVM}: mounting ${VMPREFIX}-pbs /mnt/share"
+		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mkdir -p /mnt/share""
+		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo chown $USERNAME:$USERNAME /mnt/share""
+		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mount -t nfs ${pbsmountip}:/mnt/share /mnt/share""
 		# openPBSクライアント：インストール
 		echo "confuguring all compute nodes"
-		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo yum install --quiet -y hwloc-libs libICE libSM""
+		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30'-i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo yum install --quiet -y hwloc-libs libICE libSM""
 		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo yum install --quiet -y libnl3""
 		echo "installing libnl3"
 		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo yum install --quiet -y /home/$USERNAME/openpbs-execution-20.0.1-0.x86_64.rpm""
