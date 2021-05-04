@@ -156,6 +156,9 @@ jobs:
           grep "azure_*" ./pbssetting.sh  | head -n 2
 
           # クルデンシャル
+          sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./hpcbmtenv.sh
+          sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./hpcbmtenv.sh
+          sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./hpcbmtenv.sh
           sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./pbssetting.sh
           sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./pbssetting.sh
           sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./pbssetting.sh
