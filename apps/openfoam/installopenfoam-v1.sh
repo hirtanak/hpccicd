@@ -24,8 +24,8 @@ echo "SSHKEYDIR: $SSHKEYDIR"
 # コマンド名取得
 CMDNAME=$(basename "$0")
 # コマンドオプションエラー処理
-if [ $# -eq 0 ]; then
-	echo "実行するには0個の引数が必要です。" 1>&2
+if [ $# -eq 1 ]; then
+	echo "実行するには1個の引数が必要です。" 1>&2
 	exit 1
 fi
 
@@ -67,10 +67,10 @@ SSHCMD="ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@${vm1ip} -t -t
 ${SSHCMD} "ls -la /mnt/share/OpenFOAM/OpenFOAM-${OPENFOAM_VERSION}/bin/foamSystemCheck | wc -l" > ./buildfiles
 buildfiles=$(cat ./buildfiles)
 echo "buildfiles: $buildfiles"
-if [ -n "$buildfiles" ]; then
+if [ $((buildfiles)) -ge 1 ]; then
 	echo "You have already buit for this OoenFOAM version."
 else
-		# OpenFOAM インストールセットアップ
+	# OpenFOAM インストールセットアップ
 	${SSHCMD} "wget -q https://gitlab.com/OpenCAE/installOpenFOAM/-/archive/master/installOpenFOAM-master.tar.gz -O /home/$USERNAME/installOpenFOAM-master.tar.gz"
 	${SSHCMD} "tar zxf /home/$USERNAME/installOpenFOAM-master.tar.gz"
 	${SSHCMD} "rm -rf /home/$USERNAME/installOpenFOAM"
@@ -144,6 +144,7 @@ if [[ ${checksystem} = PASS ]]; then
 	echo "passed the OpenFOAM system check"
 else
 	echo "failure by some reason"
+	exit 1
 fi
 
 
