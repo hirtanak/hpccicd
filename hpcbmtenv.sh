@@ -1503,6 +1503,7 @@ EOL
 		echo "diskformat: $diskformat"
 		# リモートの /dev/sdc が存在する
 		diskformat2=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo ls /dev/sdc")
+		echo "diskformat2: $diskformat2"		
 		if [ -n "$diskformat2" ]; then
 			# かつ、 /dev/sdc1 が存在しない場合のみ実施
 			diskformat3=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo ls /dev/sdc1")
@@ -1516,13 +1517,13 @@ EOL
 					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo parted /dev/sdc --script mklabel gpt mkpart xfspart xfs 0% 100%"
 					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo mkfs.xfs /dev/sdc1"
 					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo partprobe /dev/sdc1"
+					echo "pbsnode: fromatted a new disk."
+					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "df | grep sdc1"
 				fi
-			fi
 			else
 				echo "your pbs node has not the device."
+			fi
 		fi
-		echo "pbsnode: fromatted a new disk."
-		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "df | grep sdc1"
 		unset diskformat && unset diskformat2 && unset diskformat3
 
 		# fstab設定
