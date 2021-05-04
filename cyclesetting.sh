@@ -3,12 +3,13 @@ echo "CYCLECLOUD: CyelceCloud postinstall settings..."
 
 CYCLECLOUDNAME=cyclecloud01
 
-MyResourceGroup=tmcbmt01-hpccicd01
-VMPREFIX=hpccicd01
+MyResourceGroup=tmcbmt01
+VMPREFIX=tmcbmt01
 # ユーザ名: デフォルト azureuser
 USERNAME=azureuser
-# SSH公開鍵ファイルを指定：デフォルトではカレントディレクトリを利用する
 #SSHKEYFILE="./${VMPREFIX}.pub"
+SSHKEYDIR="./${VMPREFIX}"
+echo "SSHKEYDIR: $SSHKEYDIR"
 
 ### ログイン処理
 # サブスクリプションが複数ある場合は指定しておく
@@ -17,13 +18,10 @@ USERNAME=azureuser
 #azure_name="uuid"
 #azure_password="uuid"
 #azure_tenant="uuid"
-az login --service-principal --username "${azure_name}" --password "${azure_password}" --tenant "${azure_tenant}" --output none
+#az login --service-principal --username ${azure_name} --password ${azure_password} --tenant ${azure_tenant} --output none
 
 # コマンド名取得
 CMDNAME=$(basename "$0")
-# SSH鍵チェック
-SSHKEYDIR="./${VMPREFIX}"
-echo "SSHKEYDIR: $SSHKEYDIR"
 
 # グローバルIPアドレスの取得・処理
 curl -s https://ifconfig.io > tmpip #利用しているクライアントのグローバルIPアドレスを取得
@@ -81,4 +79,4 @@ echo "CyecleCloud listening port..."
 ${SSHCMD} "netstat -ntlp"
 
 
-echo "$CMDNAME: CYCLECLOUD -  end of CyelcCloud postinstall settings."
+echo "$CMDNAME: CYCLECLOUD - end of CyelcCloud postinstall settings."

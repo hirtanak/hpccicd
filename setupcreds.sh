@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "starting setupcred.sh."
 
 # apps 配下のアプリケーション実行時の設定変更利用
 # $1 変更対象のファイル名

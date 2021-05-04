@@ -44,7 +44,7 @@ echo "addtional accessible CIDR: $LIMITEDIP2"
 # コマンド名取得
 CMDNAME=$(basename "$0")
 
-# github actions向けスペース
+# github actions向けダイレクト指定
 SSHKEYDIR="./${VMPREFIX}"
 echo "SSHKEYDIR: $SSHKEYDIR"
 
