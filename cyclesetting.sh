@@ -1,10 +1,10 @@
 #!/bin/bash
 echo "CYCLECLOUD: CyelceCloud postinstall settings..."
 
-CYCLECLOUDNAME=cyclecloud01
+VMPREFIX=tmcbmt01
+CYCLECLOUDNAME=${VMPREFIX}-cyclecloud01
 
 MyResourceGroup=tmcbmt01
-VMPREFIX=tmcbmt01
 USERNAME=azureuser # ユーザ名: デフォルト azureuser
 #SSHKEYFILE="./${VMPREFIX}.pub"
 SSHKEYDIR="./${VMPREFIX}"

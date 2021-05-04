@@ -90,9 +90,10 @@ jobs:
 
           # Update NSG
           bash ./hpcbmtenv.sh updatensg
-          # Azure CycleCloud構築
+          # Azure CycleCloud 構築
           echo "create cyclecloud..."
           bash ./addcyclecloud.sh
+          # Azure CycleCloud 設定
           echo "postinstall cyclecloud setting..."
           bash ./cyclesetting.sh
 
