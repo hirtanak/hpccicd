@@ -245,11 +245,12 @@ jobs:
           #git rm -r ./tmp/*
           git diff
           git add ./docs/result/*
+          git add ./docs/result/result-${logdate}.rst
           git diff
           git commit -m "pingpong: update all result"
           git diff
           git status
-          git push origin HEAD:main
+          git push -f origin HEAD:main
 
   success:
     name: pingpong-success_teams_notification
