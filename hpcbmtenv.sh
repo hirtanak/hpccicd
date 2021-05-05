@@ -1240,7 +1240,6 @@ EOL
 		if [ -f ./vmlist ]; then rm ./vmlist; fi
 		if [ -f ./ipaddresslist ]; then rm ./ipaddresslist; fi
 		if [ -f ./nodelist ]; then rm ./nodelist; fi
-
 		echo "creating vmlist and ipaddresslist"
 		az vm list-ip-addresses -g $MyResourceGroup --query "[].virtualMachine[].{Name:name, PrivateIPAddresses:network.privateIpAddresses[0], PublicIp:network.publicIpAddresses[0].ipAddress}" -o tsv > tmpfile
 		for count in $(seq 1 10); do
@@ -1248,69 +1247,28 @@ EOL
 				break
 			else
 				az vm list-ip-addresses -g $MyResourceGroup --query "[].virtualMachine[].{Name:name, PrivateIPAddresses:network.privateIpAddresses[0], PublicIp:network.publicIpAddresses[0].ipAddress}" -o tsv > tmpfile
-				#cat ./tmpfile
+				cat ./tmpfile
 				echo "getting list-ip-address: sleep 2" & sleep 2
 			fi
 		done
-
 		# 自然な順番でソートする
 		sort -V ./tmpfile > tmpfile2
-		# vmlist 取り出し：1列目
-		cut -f 1 ./tmpfile2 > vmlist
-		# nodelist 取り出し：2列目
-		echo "careating IP Address list"
-		cut -f 2 ./tmpfile2 > nodelist
-		# ipaddresslist 取り出し：3列目
-		echo "ipaddresslist file contents"
-		cut -f 3 ./tmpfile2 > ipaddresslist
-		cat ./ipaddresslist
+		# 取り出す前に、不必要な行は削除
+		grep -e "${VMPREFIX}-[1-99]" ./tmpfile2 > tmpfile3
 
 		# vmlist 取り出し：1列目
-		echo "checking vmlist"
-		numvm=$(cat ./vmlist | wc -l)
-		# vmlist チェック
-		if [ $((numvm)) -ne $((MAXVM)) ]; then
-			# 規定より少なければ、再作成
-			az vm list-ip-addresses -g $MyResourceGroup --query "[].virtualMachine[].{Name:name, PrivateIPAddresses:network.privateIpAddresses[0], PublicIp:network.publicIpAddresses[0].ipAddress}" -o tsv > tmpfile
-			sort -V ./tmpfile > tmpfile2
-			cut -f 1 ./tmpfile2 > ./vmlist
-		fi
-		if [ $((numvm)) -ge $((MAXVM+2)) ]; then
-			# ログインノード、PBSノードの 2行削除する(pingpong未対象)
-			sed -i -e '$d' ./vmlist
-			sed -i -e '$d' ./vmlist
-		fi
-		# ipaddresslist チェック
-		echo "checking ipaddresslist"
-		numip=$(cat ./ipaddresslist | wc -l)
-		if [ $((numip)) -ne $((MAXVM)) ]; then
-			# 規定より少なければ、再作成
-			az vm list-ip-addresses -g $MyResourceGroup --query "[].virtualMachine[].{Name:name, PrivateIPAddresses:network.privateIpAddresses[0], PublicIp:network.publicIpAddresses[0].ipAddress}" -o tsv > tmpfile
-			sort -V ./tmpfile > tmpfile2
-			cut -f 3 ./tmpfile2 > ipaddresslist
-		fi
-		if [ $((numip)) -ge $((MAXVM+2)) ]; then
-			# ログインノード、PBSノードの 2行削除する(pingpong未対象)
-			sed -i -e '$d' ./ipaddresslist
-			sed -i -e '$d' ./ipaddresslist
-		fi
-		# ノードリストチェック
-		echo "checking nodelist"
-		numip=$(cat ./nodelist | wc -l)
-		if [ $((numip)) -ne $((MAXVM)) ]; then
-			# 規定より少なければ、再作成
-			az vm list-ip-addresses -g $MyResourceGroup --query "[].virtualMachine[].{Name:name, PrivateIPAddresses:network.privateIpAddresses[0], PublicIp:network.publicIpAddresses[0].ipAddress}" -o tsv > tmpfile
-			sort -V ./tmpfile > tmpfile2
-			cut -f 2 ./tmpfile2 > nodelist
-		fi
-		if [ $((numip)) -ge $((MAXVM+2)) ]; then
-			# ログインノード、PBSノードの 2行削除する(pingpong未対象)
-			sed -i -e '$d' ./nodelist
-			sed -i -e '$d' ./nodelist
-		fi
+		cut -f 1 ./tmpfile3 > vmlist
+		# nodelist 取り出し：2列目
+		echo "careating IP Address list"
+		cut -f 2 ./tmpfile3 > nodelist
+		# ipaddresslist 取り出し：3列目
+		echo "ipaddresslist file contents"
+		cut -f 3 ./tmpfile3 > ipaddresslist
+
 		# テンポラリファイル削除
 		rm ./tmpfile
 		rm ./tmpfile2
+		rm ./tmpfile3
 
 		# pingponglist ファイルチェック・削除
 		if [ -f ./pingponglist ]; then rm ./pingponglist; fi
@@ -1388,7 +1346,7 @@ EOL
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "bash /mnt/resource/fullpingpong.sh > /mnt/resource/result"
 			echo "copying the result from vm1 to local"
 			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}":/mnt/resource/result ./
-			ls -la
+			ls -la | grep result
 			cat ./result
 			echo "ローカルのresultファイルを確認"
 		else
@@ -1428,7 +1386,7 @@ EOL
 				# 多段の場合、ローカルにもダウンロードが必要
 				echo "copying the result from vm1 to local"
 				scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1privateip}":/home/$USERNAME/ ./
-				ls -la
+				ls -la | grep result
 				cat ./result
 				echo "ローカルのresultファイルを確認"
 			done
@@ -1477,7 +1435,7 @@ EOL
 		# 永続ディスクが必要な場合に設定可能
 		if [ $((PBSPERMANENTDISK)) -gt 0 ]; then
 			az vm disk attach --new -g $MyResourceGroup --size-gb $PBSPERMANENTDISK --sku Premium_LRS --vm-name ${VMPREFIX}-pbs --name ${VMPREFIX}-pbs-disk0 -o table || \
-				az vm disk attach --new -g $MyResourceGroup --size-gb $PBSPERMANENTDISK --sku Premium_LRS --vm-name ${VMPREFIX}-pbs --name ${VMPREFIX}-pbs-disk0 -o table 
+				az vm disk attach -g $MyResourceGroup --vm-name ${VMPREFIX}-pbs --name ${VMPREFIX}-pbs-disk0 -o table
 		fi
 		# SSHパスワードレスセッティング
 		echo "pbsnode: prparing passwordless settings"
