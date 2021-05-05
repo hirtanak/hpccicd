@@ -191,15 +191,13 @@ jobs:
         ls -la ./
         mkdir -p ./docs ./docs/_build
         ls -la ./docs/
-        #cp ./docs/index.rst.tmp ./docs/index.rst
-        #logdate=$(date "+%Y%m%d_%H%M")
+        logdate=result-$(date "+%Y%m%d_%H%M")
         cp ./docs/result/result.txt ./docs/result/result-${logdate}.rst
         ls -la ./docs/result/
-        ###echo "   result/result-${logdate}.rst" >> ./docs/index.rst
-        ###sed -i -e "$a "   result\/result-${logdate}.rst"" ./docs/index.rst
         ls ./docs/result/* > ./docs/list
         # インデックスが重要なためスペース3つ分あけること
         sed -i -e "/result\//s/^/   /g" ./docs/list
+        cat ./docs/list
         # ./docs を削除
         sed -i -e "s/\.\/docs\/result/\/result/g" ./docs/list
         # sed, echo 以外でファイル統合
@@ -226,10 +224,28 @@ jobs:
           git commit -m "pingpong: auto rebuilding site"
           git push -f origin HEAD:gh-pages
 
+  success:
+    name: pingpong-success_teams_notification
+    runs-on: ubuntu-18.04
+    needs: [website_build-deploy]
+    steps:
+      - uses: actions/checkout@master
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          dry_run: False
+      - name: sucuess! 
+        run: |
+          echo '::success::pingpong and wesite upload was sucuess!'
+
   setup_failure:
     name: setup_failure
     runs-on: ubuntu-latest
-    needs: pingpong
+    needs: success
     steps:
       - name: setup_failure
         uses: actions/checkout@v2
