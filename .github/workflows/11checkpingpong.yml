@@ -188,6 +188,13 @@ jobs:
 
     - name: Web Site Build
       run: |
+        echo "set up existing result"
+        mkdir -p tmp
+        cd tmp
+        git clone -b gh-pages https://github.com/hirtanak/hpccicd.git
+        cp ./tmp/hpccicd/docs/result/* ./docs/result/
+        echo "set up new result file"
+        cd ../
         ls -la ./
         mkdir -p ./docs ./docs/_build
         ls -la ./docs/
