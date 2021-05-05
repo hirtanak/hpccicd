@@ -192,8 +192,11 @@ jobs:
         mkdir -p ./docs ./docs/_build
         ls -la ./docs/
         unset logdate
+        echo "before"
+        ls -la ./docs/result/
         logdate=$(date "+%Y%m%d_%H%M")
-        cp ./docs/result/result.txt ./docs/result/result-${logdate}.rst
+        mv ./docs/result/result.txt ./docs/result/result-${logdate}.rst
+        echo "after"
         ls -la ./docs/result/
         ls ./docs/result/* > ./docs/list
         # インデックスが重要なためスペース3つ分あけること
