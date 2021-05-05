@@ -194,6 +194,8 @@ jobs:
         git clone -b gh-pages https://github.com/hirtanak/hpccicd.git
         # ディレクトリ注意
         cp ./hpccicd/docs/result/* ../docs/result/
+        ls ./hpccicd/docs/result/
+        ls ../docs/result/
         echo "set up new result file"
         cd ../
         ls -la ./
@@ -235,6 +237,11 @@ jobs:
           git add ./docs/result/*
           git commit -m "pingpong: auto rebuilding site"
           git push -f origin HEAD:gh-pages
+          # update all result to main branch
+          git checkout main
+          git add ./docs/result/*
+          git commit -m "pingpong: update all result"
+          git push origin HEAD:main
 
   success:
     name: pingpong-success_teams_notification
