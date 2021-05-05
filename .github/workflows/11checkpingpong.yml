@@ -237,13 +237,18 @@ jobs:
           git add ./docs/result/*
           git commit -m "pingpong: auto rebuilding site"
           git push -f origin HEAD:gh-pages
-          # update all result to main branch
-          #git checkout main
+          echo "update all result to main branch"
+          git checkout main
+          git branch
           #git rm -r ./docs/_build/*
           #git rm ./docs/*
           #git rm -r ./tmp/*
+          git diff
           git add ./docs/result/*
+          git diff
           git commit -m "pingpong: update all result"
+          git diff
+          git status
           git push origin HEAD:main
 
   success:
