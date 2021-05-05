@@ -239,9 +239,9 @@ jobs:
           git push -f origin HEAD:gh-pages
           # update all result to main branch
           #git checkout main
-          git rm ./docs/_build/*
+          git rm -r ./docs/_build/*
           git rm ./docs/*
-          git rm ./tmp/*
+          git rm -r ./tmp/*
           git add ./docs/result/*
           git commit -m "pingpong: update all result"
           git push origin HEAD:main
