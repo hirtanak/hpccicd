@@ -1243,6 +1243,16 @@ EOL
 
 		echo "creating vmlist and ipaddresslist"
 		az vm list-ip-addresses -g $MyResourceGroup --query "[].virtualMachine[].{Name:name, PrivateIPAddresses:network.privateIpAddresses[0], PublicIp:network.publicIpAddresses[0].ipAddress}" -o tsv > tmpfile
+		for count in $(seq 1 10); do
+			if [ -s ./tmpfile ]; then
+				break
+			else
+				az vm list-ip-addresses -g $MyResourceGroup --query "[].virtualMachine[].{Name:name, PrivateIPAddresses:network.privateIpAddresses[0], PublicIp:network.publicIpAddresses[0].ipAddress}" -o tsv > tmpfile
+				#cat ./tmpfile
+				echo "getting list-ip-address: sleep 2" & sleep 2
+			fi
+		done
+
 		# 自然な順番でソートする
 		sort -V ./tmpfile > tmpfile2
 		# vmlist 取り出し：1列目
@@ -1467,7 +1477,7 @@ EOL
 		# 永続ディスクが必要な場合に設定可能
 		if [ $((PBSPERMANENTDISK)) -gt 0 ]; then
 			az vm disk attach --new -g $MyResourceGroup --size-gb $PBSPERMANENTDISK --sku Premium_LRS --vm-name ${VMPREFIX}-pbs --name ${VMPREFIX}-pbs-disk0 -o table || \
-				az vm disk attach --new -g $MyResourceGroup --vm-name ${VMPREFIX}-pbs --name ${VMPREFIX}-pbs-disk0 -o table
+				az vm disk attach --new -g $MyResourceGroup --size-gb $PBSPERMANENTDISK --sku Premium_LRS --vm-name ${VMPREFIX}-pbs --name ${VMPREFIX}-pbs-disk0 -o table 
 		fi
 		# SSHパスワードレスセッティング
 		echo "pbsnode: prparing passwordless settings"
