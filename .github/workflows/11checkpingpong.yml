@@ -177,6 +177,14 @@ jobs:
         GITHUB_EMAIL: "hirtanak@gmail.com"
         GITHUB_REPOSITORY: ${{ github.repository }}
       run: |
+          echo "set up existing result"
+          mkdir -p tmp
+          cd tmp
+          git clone -b gh-pages https://github.com/hirtanak/hpccicd.git
+          # ディレクトリ注意
+          cp ./hpccicd/docs/result/* ../docs/result/
+          ls ./hpccicd/docs/result/
+          ls ../docs/result/
           echo "deleting..."
           wget -q https://raw.githubusercontent.com/hirtanak/hpccicd/gh-pages/docs/index.rst.original -O ./docs/index.rst.tmp
           git config --local user.name "${GITHUB_USER}"
@@ -188,16 +196,7 @@ jobs:
           git push -f origin HEAD:gh-pages
 
     - name: Web Site Build
-      run: |
-        echo "set up existing result"
-        mkdir -p tmp
-        cd tmp
-        git clone -b gh-pages https://github.com/hirtanak/hpccicd.git
-        # ディレクトリ注意
-        cp ./hpccicd/docs/result/* ../docs/result/
-        ls ./hpccicd/docs/result/
-        ls ../docs/result/
-          
+      run: |          
         echo "set up new result file"
         cd ../
         ls -la ./
