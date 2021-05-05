@@ -248,7 +248,7 @@ jobs:
           git add docs --force
           git commit -m "pingpong: auto rebuilding site"
           #git push -f origin HEAD:gh-pages
-          git subtree push --prefix docs origin HEAD:gh-pages
+          git subtree push --prefix docs origin gh-pages
           echo "update all result to main branch"
           #git checkout main
           #git branch
