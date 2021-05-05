@@ -245,8 +245,10 @@ jobs:
           git add ./docs/index.rst
           git add ./docs/result/*
           git add ./docs/result/result-$(cat ./logdate).rst
+          git add docs --force
           git commit -m "pingpong: auto rebuilding site"
-          git push -f origin HEAD:gh-pages
+          #git push -f origin HEAD:gh-pages
+          git subtree push --prefix docs -f origin HEAD:gh-pages
           echo "update all result to main branch"
           #git checkout main
           #git branch
