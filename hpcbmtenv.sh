@@ -1321,10 +1321,19 @@ Host *
 StrictHostKeyChecking no
 UserKnownHostsFile=/dev/null
 EOL
+
 		fi
 		# コマンド実行方法判断
 		vm1ip=$(az vm show -d -g $MyResourceGroup --name ${VMPREFIX}-1 --query publicIps -o tsv)
 		checkssh=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" "uname")
+		for count in $(seq 1 10); do
+			if [ -z "$checkssh" ]; then
+				checkssh=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" "uname")
+				echo "accessing VM#1 by ssh...." && sleep 2
+			else
+				break
+			fi
+		done
 		if [ -n "$checkssh" ]; then
 			# SSHアクセス可能：SSHでダイレクトに実施（早い）
 			echo "running on direct access to all compute nodes"
