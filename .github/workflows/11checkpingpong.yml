@@ -185,6 +185,8 @@ jobs:
           cp ./hpccicd/docs/result/* ../docs/result/
           ls ./hpccicd/docs/result/
           ls ../docs/result/
+          # ディレクトリ移動
+          cd ../
           echo "deleting..."
           wget -q https://raw.githubusercontent.com/hirtanak/hpccicd/gh-pages/docs/index.rst.original -O ./docs/index.rst.tmp
           git config --local user.name "${GITHUB_USER}"
