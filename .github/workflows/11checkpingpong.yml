@@ -192,7 +192,8 @@ jobs:
         mkdir -p tmp
         cd tmp
         git clone -b gh-pages https://github.com/hirtanak/hpccicd.git
-        cp ./hpccicd/docs/result/* ./docs/result/
+        # ディレクトリ注意
+        cp ./hpccicd/docs/result/* ../docs/result/
         echo "set up new result file"
         cd ../
         ls -la ./
