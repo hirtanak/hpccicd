@@ -1,6 +1,7 @@
 name: 01azure_deploy
 on:
   push:
+    branches: [main]
     paths:
       - senarios/basicdeploy
 
