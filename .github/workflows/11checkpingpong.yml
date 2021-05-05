@@ -240,7 +240,7 @@ jobs:
           # update all result to main branch
           #git checkout main
           #git rm -r ./docs/_build/*
-          git rm ./docs/*
+          #git rm ./docs/*
           #git rm -r ./tmp/*
           git add ./docs/result/*
           git commit -m "pingpong: update all result"
