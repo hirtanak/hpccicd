@@ -191,7 +191,7 @@ jobs:
         ls -la ./
         mkdir -p ./docs ./docs/_build
         ls -la ./docs/
-        logdate=result-$(date "+%Y%m%d_%H%M")
+        logdate=$(date "+%Y%m%d_%H%M")
         cp ./docs/result/result.txt ./docs/result/result-${logdate}.rst
         ls -la ./docs/result/
         ls ./docs/result/* > ./docs/list
