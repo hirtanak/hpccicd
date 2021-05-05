@@ -1279,7 +1279,7 @@ EOL
 			done
 		done
 		# fullpingpongコマンドスクリプト作成
-		rm ./fullpingpong.sh
+		if [ -f ./fullpingpong.sh ]; then rm ./fullpingpong.sh; fi
 		cat <<'EOL' >> fullpingpong.sh
 #!/bin/bash
 checkosver=$(cat /etc/redhat-release | cut  -d " " -f 4)
