@@ -177,6 +177,16 @@ jobs:
         GITHUB_EMAIL: "hirtanak@gmail.com"
         GITHUB_REPOSITORY: ${{ github.repository }}
       run: |
+          echo "set up existing result"
+          mkdir -p tmp
+          cd tmp
+          git clone -b gh-pages https://github.com/hirtanak/hpccicd.git
+          # ディレクトリ注意
+          cp ./hpccicd/docs/result/* ../docs/result/
+          ls ./hpccicd/docs/result/
+          ls ../docs/result/
+          
+          echo "deleting..."
           wget -q https://raw.githubusercontent.com/hirtanak/hpccicd/gh-pages/docs/index.rst.original -O ./docs/index.rst.tmp
           git config --local user.name "${GITHUB_USER}"
           git config --local user.email "${GITHUB_EMAIL}"
@@ -188,14 +198,6 @@ jobs:
 
     - name: Web Site Build
       run: |
-        echo "set up existing result"
-        mkdir -p tmp
-        cd tmp
-        git clone -b gh-pages https://github.com/hirtanak/hpccicd.git
-        # ディレクトリ注意
-        cp ./hpccicd/docs/result/* ../docs/result/
-        ls ./hpccicd/docs/result/
-        ls ../docs/result/
         echo "set up new result file"
         cd ../
         ls -la ./
@@ -205,6 +207,7 @@ jobs:
         echo "before"
         ls -la ./docs/result/
         logdate=$(date "+%Y%m%d_%H%M")
+        echo $logdate > ./logdate
         mv ./docs/result/result.txt ./docs/result/result-${logdate}.rst
         echo "after"
         ls -la ./docs/result/
@@ -235,6 +238,7 @@ jobs:
           git add ./docs/index.html
           git add ./docs/index.rst
           git add ./docs/result/*
+          git add ./docs/result/result-$(cat ./logdate).rst
           git commit -m "pingpong: auto rebuilding site"
           git push -f origin HEAD:gh-pages
           echo "update all result to main branch"
@@ -243,14 +247,14 @@ jobs:
           #git rm -r ./docs/_build/*
           #git rm ./docs/*
           #git rm -r ./tmp/*
-          git diff
-          git add ./docs/result/*
-          git add ./docs/result/result-${logdate}.rst
-          git diff
-          git commit -m "pingpong: update all result"
-          git diff
-          git status
-          git push -f origin HEAD:main
+          #git diff
+          #git add ./docs/result/*
+          #git add ./docs/result/result-${logdate}.rst
+          #git diff
+          #git commit -m "pingpong: update all result"
+          #git diff
+          #git status
+          #git push -f origin HEAD:main
 
   success:
     name: pingpong-success_teams_notification
