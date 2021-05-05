@@ -224,7 +224,10 @@ jobs:
         # Build
         sphinx-build -E -b singlehtml ./docs/ docs/_build
         # Copy index.html to document root
+        rm ./docs/index.html
         cp ./docs/_build/index.html ./docs/index.html
+        cp -rf ./docs/_build/* ./docs/
+        
 
     - name: Web Site Push - update files
       env:
@@ -235,7 +238,9 @@ jobs:
           git config --local user.name "${GITHUB_USER}"
           git config --local user.email "${GITHUB_EMAIL}"
           git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
-          git add ./docs/_build/*
+          #git add ./docs/_build/*
+          git add ./docs/.doctrees
+          git add ./docs/_static/*
           git add ./docs/index.html
           git add ./docs/index.rst
           git add ./docs/result/*
