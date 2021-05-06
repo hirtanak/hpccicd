@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "BUILD: try openfoam build...."
+set -x
 
 # 引数1：OpenFOAMのバージョン
 OPENFOAM_VERSION=$1
@@ -63,6 +64,7 @@ fi
 # SSHアクセスチェック：VM#1
 unset checkssh
 checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i ${SSHKEYDIR} -t $USERNAME@"${vm1ip}" "uname")
+echo "accessing vm1 by ssh...: $checkssh"
 for count in $(seq 1 10); do
 	if [ -z "$checkssh" ]; then 
 		echo "sleep 2" & sleep 2
