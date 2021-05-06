@@ -1,6 +1,7 @@
 name: 81appinstall_openfoam
 on:
   push:
+    branches: [main]
     paths:
       - senarios/testappbuild
 
