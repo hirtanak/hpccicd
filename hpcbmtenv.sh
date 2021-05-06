@@ -287,41 +287,41 @@ case $1 in
 				done
 				if [ -n "$checkssh" ]; then
 					echo "${VMPREFIX}-${count}: configuring fstab by ssh"
-					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@${line} -t -t "sudo sed -i -e '/azure_resource-part1/d' /etc/fstab"
+					#ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@${line} -t -t "sudo sed -i -e '/azure_resource-part1/d' /etc/fstab"
 					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@${line} -t -t 'sudo umount /dev/disk/cloud/azure_resource-part1'
 					# 重複していないかチェック
-					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@${line} -t -t "sudo grep ${mountip}:/mnt/resource /etc/fstab" > checkfstab
+					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@${line} -t -t "sudo grep ${mountip}:/mnt/resource/scratch /etc/fstab" > checkfstab
 					checkfstab=$(cat checkfstab | wc -l)
 					if [ $((checkfstab)) -ge 2 ]; then 
 						echo "deleting dupulicated settings...."
-						ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo sed -i -e '/${mountip}:\/mnt\/resource/d' /etc/fstab"
-						ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo sed -i -e '$ a ${mountip}:/mnt/resource    /mnt/resource    xfs    defaults    0    0' /etc/fstab"
+						#ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo sed -i -e '/${mountip}:\/mnt\/resource/d' /etc/fstab"
+						ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
 					elif [ $((checkfstab)) -eq 1 ]; then
 						echo "correct fstab setting"
 					elif [ $((checkfstab)) -eq 0 ]; then
-						echo "fstab missing: no /mnt/resource here!"
-						ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo sed -i -e '$ a ${mountip}:/mnt/resource    /mnt/resource    xfs    defaults    0    0' /etc/fstab"
+						echo "fstab missing: no /mnt/resource/scratch here!"
+						ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
 					fi
 				else
 					# fstab 設定: az vm run-command
 					echo "${VMPREFIX}-${count}: configuring fstab by az vm run-command"
-					az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo sed -i -e '/azure_resource-part1/d' /etc/fstab"
+					#az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo sed -i -e '/azure_resource-part1/d' /etc/fstab"
 					az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts 'sudo umount /dev/disk/cloud/azure_resource-part1'
 					# 重複していないかチェック
-					az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo grep "${mountip}:/mnt/resource" /etc/fstab" > checkfstab
+					az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo grep "${mountip}:/mnt/resource/scratch" /etc/fstab" > checkfstab
 					checkfstab=$(cat checkfstab | wc -l)
 					if [ $((checkfstab)) -ge 2 ]; then 
 						echo "deleting dupulicated settings...."
+						#az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
+							#--scripts "sudo sed -i -e '/${mountip}:\/mnt\/resource/d' /etc/fstab"
 						az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
-							--scripts "sudo sed -i -e '/${mountip}:\/mnt\/resource/d' /etc/fstab"
-						az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
-							--scripts "sudo sed -i -e '$ a ${mountip}:/mnt/resource    /mnt/resource    xfs    defaults    0    0' /etc/fstab"
+							--scripts "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
 					elif [ $((checkfstab)) -eq 1 ]; then
 						echo "correct fstab setting"
 					elif [ $((checkfstab)) -eq 0 ]; then
-						echo "fstab missing: no /mnt/resource here!"
+						echo "fstab missing: no /mnt/resource/scratch here!"
 						az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
-							--scripts "sudo sed -i -e '$ a ${mountip}:/mnt/resource    /mnt/resource    xfs    defaults    0    0' /etc/fstab"
+							--scripts "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
 					fi
 				fi
 			done
@@ -339,10 +339,10 @@ case $1 in
 		echo "checkssh connectiblity for ${VMPREFIX}-1: $checkssh"
 		if [ -z "$checkssh" ]; then
 			az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-1 --command-id RunShellScript \
-				--scripts "sudo yum install --quiet -y nfs-utils epel-release && echo '/mnt/resource *(rw,no_root_squash,async)' >> /etc/exports"
+				--scripts "sudo yum install --quiet -y nfs-utils epel-release && echo '/mnt/resource/scratch *(rw,no_root_squash,async)' >> /etc/exports"
 			az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-1 --command-id RunShellScript --scripts "sudo yum install --quiet -y htop"
 			sleep 5
-			az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-1 --command-id RunShellScript --scripts "sudo chown ${USERNAME}:${USERNAME} /mnt/resource"
+			az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-1 --command-id RunShellScript --scripts "sudo chown ${USERNAME}:${USERNAME} /mnt/resource/scratch"
 			az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-1 --command-id RunShellScript --scripts "sudo systemctl start rpcbind && sudo systemctl start nfs-server"
 			az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-1 --command-id RunShellScript --scripts "sudo systemctl enable rpcbind && sudo systemctl enable nfs-server"
 		else
@@ -357,8 +357,8 @@ case $1 in
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo yum install --quiet -y nfs-utils epel-release"
 			# アフターインストール：epel-release
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo yum install --quiet -y htop"
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "echo '/mnt/resource *(rw,no_root_squash,async)' | sudo tee /etc/exports"
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo chown ${USERNAME}:${USERNAME} /mnt/resource"
+			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "echo '/mnt/resource/scratch *(rw,no_root_squash,async)' | sudo tee /etc/exports"
+			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo chown ${USERNAME}:${USERNAME} /mnt/resource/scratch"
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo systemctl start rpcbind && sudo systemctl start nfs-server"
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo systemctl enable rpcbind && sudo systemctl enable nfs-server"
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo showmount -e"
@@ -388,9 +388,9 @@ case $1 in
 		echo "ssh parallel settings: nfs client"
 		parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo yum install --quiet -y nfs-utils epel-release""
 		parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo yum install --quiet -y htop""
-		parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mkdir -p /mnt/resource""
-		parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo chown $USERNAME:$USERNAME /mnt/resource""
-		parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mount -t nfs ${mountip}:/mnt/resource /mnt/resource""
+		parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mkdir -p /mnt/resource/scratch""
+		parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo chown $USERNAME:$USERNAME /mnt/resource/scratch""
+		parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mount -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch""
 		rm ./ipaddresslist-tmp
 		
 		# NFSサーバ・マウント設定
@@ -409,20 +409,20 @@ case $1 in
 				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo yum install --quiet -y nfs-utils epel-release"
 				# アフターインストール：epel-release
 				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo yum install --quiet -y htop"
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo mkdir -p /mnt/resource"
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo chown $USERNAME:$USERNAME /mnt/resource"
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo mount $DEBUG -t nfs ${mountip}:/mnt/resource /mnt/resource"
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo mkdir -p /mnt/resource/scratch"
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo chown $USERNAME:$USERNAME /mnt/resource/scratch"
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo mount $DEBUG -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch"
 			else
 				echo "${VMPREFIX}-2 to ${MAXVM}: ${count} setting by az vm run-command"
 				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts 'sudo yum install --quiet -y nfs-utils epel-release'
 				# アフターインストール：epel-release
 				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts 'sudo yum install --quiet -y htop'
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mkdir -p /mnt/resource"
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo chown $USERNAME:$USERNAME /mnt/resource"
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mount $DEBUG -t nfs ${mountip}:/mnt/resource /mnt/resource"
+				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mkdir -p /mnt/resource/scratch"
+				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo chown $USERNAME:$USERNAME /mnt/resource/scratch"
+				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mount $DEBUG -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch"
 			fi
 		done
-		echo "end of mouting ${mountip}:/mnt/resource"
+		echo "end of mouting ${mountip}:/mnt/resource/scratch"
 		# SSHパスワードレスセッティング
 		echo "preparing for passwordless settings"
 		cat ./ipaddresslist
@@ -478,7 +478,7 @@ EOL
 			# PBSノードのパブリックIPが空で、IPアドレスが取得できなければ、az cliでの取得
 			echo "pbsnode: confuguring nfs mount by by az vmruuning-commands"
 			for count in $(seq 1 $MAXVM) ; do
-				# コンピュートノード#1の/mnt/resourceをマウント
+				# コンピュートノード#1の/mnt/resource/scratchをマウント
 				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mkdir -p /mnt/share"
 				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo chown $USERNAME:$USERNAME /mnt/share"
 				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mount -t nfs ${pbsmountip}:/mnt/share /mnt/share"
@@ -782,9 +782,9 @@ EOL
 			for count in $(seq 2 $MAXVM) ; do
 				# 並列化・時間短縮は検討事項
 				echo "${VMPREFIX}-1: configuring nfs mount by az vmruuning-commands"
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mkdir -p /mnt/resource"
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo chown $USERNAME:$USERNAME /mnt/resource"
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mount $DEBUG -t nfs ${mountip}:/mnt/resource /mnt/resource"
+				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mkdir -p /mnt/resource/scratch"
+				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo chown $USERNAME:$USERNAME /mnt/resource/scratch"
+				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mount $DEBUG -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch"
 			done
 		else
 			# vm1ipが空でなければSSHでマウントを実施
@@ -793,10 +793,10 @@ EOL
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" 'sudo showmount -e'
 			# 1行目を削除したIPアドレスリストを作成
 			sed '1d' ./ipaddresslist > ./ipaddresslist-tmp
-			echo "${VMPREFIX}-2 to $MAXVM: mounting ${VMPREFIX}-1 /mnt/resource"
-			parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mkdir -p /mnt/resource""
-			parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo chown $USERNAME:$USERNAME /mnt/resource""
-			parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mount -t nfs ${mountip}:/mnt/resource /mnt/resource""
+			echo "${VMPREFIX}-2 to $MAXVM: mounting ${VMPREFIX}-1 /mnt/resource/scratch"
+			parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mkdir -p /mnt/resource/scratch""
+			parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo chown $USERNAME:$USERNAME /mnt/resource/scratch""
+			parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mount -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch""
 		fi
 		echo "end of starting up computing nodes"
 		# PBSノードがなければ終了
@@ -841,10 +841,10 @@ EOL
 				# vm1ipが空でなければSSHでマウント情報の取得
 				echo "${VMPREFIX}-1: $vm1ip"
 				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" 'sudo showmount -e'
-				echo "${VMPREFIX}-2 to $MAXVM: mounting ${VMPREFIX}-1 /mnt/resource"
-				parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mkdir -p /mnt/resource""
-				parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo chown $USERNAME:$USERNAME /mnt/resource""
-				parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mount -t nfs ${mountip}:/mnt/resource /mnt/resource""
+				echo "${VMPREFIX}-2 to $MAXVM: mounting ${VMPREFIX}-1 /mnt/resource/scratch"
+				parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mkdir -p /mnt/resource/scratch""
+				parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo chown $USERNAME:$USERNAME /mnt/resource/scratch""
+				parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mount -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch""
 			fi
 			echo "end of PBS mount check"
 		fi
@@ -880,14 +880,14 @@ EOL
 		if [ -z "$vmip" ]; then
 			# vmipがパブリックIPが空でIPアドレスが取得できなければ、az cliでの取得
 				echo "${VMPREFIX}-1: configuring nfs mount by az vmruuning-commands"
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"$2" --command-id RunShellScript --scripts "sudo mkdir -p /mnt/resource"
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"$2" --command-id RunShellScript --scripts "sudo chown $USERNAME:$USERNAME /mnt/resource"
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"$2" --command-id RunShellScript --scripts "sudo mount $DEBUG -t nfs ${mountip}:/mnt/resource /mnt/resource"
+				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"$2" --command-id RunShellScript --scripts "sudo mkdir -p /mnt/resource/scratch"
+				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"$2" --command-id RunShellScript --scripts "sudo chown $USERNAME:$USERNAME /mnt/resource/scratch"
+				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"$2" --command-id RunShellScript --scripts "sudo mount $DEBUG -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch"
 		else
-			echo "${VMPREFIX}-$2: mounting ${VMPREFIX}-$2 /mnt/resource"
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vmip}" -t -t "sudo mkdir -p /mnt/resource"
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vmip}" -t -t "sudo chown $USERNAME:$USERNAME /mnt/resource"
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vmip}" -t -t "sudo mount $DEBUG -t nfs ${mountip}:/mnt/resource /mnt/resource"
+			echo "${VMPREFIX}-$2: mounting ${VMPREFIX}-$2 /mnt/resource/scratch"
+			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vmip}" -t -t "sudo mkdir -p /mnt/resource/scratch"
+			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vmip}" -t -t "sudo chown $USERNAME:$USERNAME /mnt/resource/scratch"
+			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vmip}" -t -t "sudo mount $DEBUG -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch"
 		fi
 		echo "end of starting up computing nodes"
 		# PBSノードがなければ終了
@@ -1209,13 +1209,13 @@ EOL
 			# PBSノード：マウントプライベートIP
 			pbsmountip=$(az vm show -g $MyResourceGroup --name ${VMPREFIX}-pbs -d --query privateIps -otsv)
 			echo "current mounting status"
-			parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t -t $USERNAME@{} "df | grep '/mnt/resource'""
+			parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t -t $USERNAME@{} "df | grep '/mnt/resource/scratch'""
 			echo "${VMPREFIX}-1: $vm1ip"
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" 'sudo showmount -e'
 			echo "${VMPREFIX}-2 to $MAXVM: mounting"
-			parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t -t $USERNAME@{} "sudo mkdir -p /mnt/resource""
-			parallel "$DEUBG" -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t -t $USERNAME@{} "sudo chown $USERNAME:$USERNAME /mnt/resource""
-			parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t -t $USERNAME@{} "sudo mount -t nfs ${mountip}:/mnt/resource /mnt/resource""
+			parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t -t $USERNAME@{} "sudo mkdir -p /mnt/resource/scratch""
+			parallel "$DEUBG" -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t -t $USERNAME@{} "sudo chown $USERNAME:$USERNAME /mnt/resource/scratch""
+			parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t -t $USERNAME@{} "sudo mount -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch""
 			# PBSノードが存在していれば、NFSマウントを実施
 			if [ -z "$pbsvmname" ]; then
 				parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t -t $USERNAME@{} "sudo mkdir -p /mnt/share""
@@ -1224,7 +1224,7 @@ EOL
 			fi
 		else
 			for count in $(seq 2 $MAXVM) ; do
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mount -t nfs ${mountip}:/mnt/resource /mnt/resource" &
+				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mount -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch" &
 			done
 			echo "sleep 180" && sleep 180
 			for count in $(seq 1 $MAXVM) ; do
@@ -1283,8 +1283,8 @@ EOL
 		cat <<'EOL' >> fullpingpong.sh
 #!/bin/bash
 checkosver=$(cat /etc/redhat-release | cut  -d " " -f 4)
-cp /home/$USER/* /mnt/resource/
-cd /mnt/resource/
+cp /home/$USER/* /mnt/resource/scratch/
+cd /mnt/resource/scratch/
 max=$(cat ./pingponglist | wc -l)
 count=1
 ## TZ=JST-9 date
@@ -1342,8 +1342,8 @@ EOL
 			cat ./pingponglist
 			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./fullpingpong.sh $USERNAME@"${vm1ip}":/home/$USERNAME/
 			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./pingponglist $USERNAME@"${vm1ip}":/home/$USERNAME/
-			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./fullpingpong.sh $USERNAME@"${vm1ip}":/mnt/resource/
-			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./pingponglist $USERNAME@"${vm1ip}":/mnt/resource/
+			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./fullpingpong.sh $USERNAME@"${vm1ip}":/mnt/resource/scratch/
+			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./pingponglist $USERNAME@"${vm1ip}":/mnt/resource/scratch/
 			# SSH追加設定
 			cat ./ipaddresslist
 			echo "pingpong: copy passwordless settings"
@@ -1351,10 +1351,10 @@ EOL
 			seq 1 $MAXVM | parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "chmod 600 /home/$USERNAME/.ssh/config""
 			# コマンド実行
 			echo "pingpong: running pingpong for all compute nodes"
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "rm /mnt/resource/result"
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "bash /mnt/resource/fullpingpong.sh > /mnt/resource/result"
+			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "rm /mnt/resource/scratch/result"
+			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "bash /mnt/resource/scratch/fullpingpong.sh > /mnt/resource/scratch/result"
 			echo "copying the result from vm1 to local"
-			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}":/mnt/resource/result ./
+			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}":/mnt/resource/scratch/result ./
 			ls -la | grep result
 			cat ./result
 			echo "ローカルのresultファイルを確認"
@@ -1380,18 +1380,18 @@ EOL
 				echo "ローカル: ssh: ホストファイル転送 transfer login node"
 				scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./fullpingpong.sh $USERNAME@"${loginvmip}":/home/$USERNAME/
 				scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./pingponglist $USERNAME@"${loginvmip}":/home/$USERNAME/
-				scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./fullpingpong.sh $USERNAME@"${loginvmip}":/mnt/resource/
-				scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./pingponglist $USERNAME@"${loginvmip}":/mnt/resource/
+				scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./fullpingpong.sh $USERNAME@"${loginvmip}":/mnt/resource/scratch/
+				scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./pingponglist $USERNAME@"${loginvmip}":/mnt/resource/scratch/
 				# ファイル転送: login node to VM#1
 				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "scp -o StrictHostKeyChecking=no -i ${SSHKEYDIR} ./fullpingpong.sh $USERNAME${vm1privateip}:/home/$USERNAME/"
 				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "scp -o StrictHostKeyChecking=no -i ${SSHKEYDIR} ./pingponglist $USERNAME@${vm1privateip}:/home/$USERNAME/"
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "scp -o StrictHostKeyChecking=no -i ${SSHKEYDIR} ./fullpingpong.sh $USERNAME@${vm1privateip}:/mnt/resource/"
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "scp -o StrictHostKeyChecking=no -i ${SSHKEYDIR} ./pingponglist $USERNAME@${vm1privateip}:/mnt/resource/"
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "scp -o StrictHostKeyChecking=no -i ${SSHKEYDIR} ./fullpingpong.sh $USERNAME@${vm1privateip}:/mnt/resource/scratch/"
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "scp -o StrictHostKeyChecking=no -i ${SSHKEYDIR} ./pingponglist $USERNAME@${vm1privateip}:/mnt/resource/scratch/"
 				# pingpongコマンド実行
 				echo "pingpong: running pingpong for all compute nodes"
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@${vm1privateip} -t -t 'rm /mnt/resource/result'"
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@${vm1privateip} -t -t "bash /mnt/resource/fullpingpong.sh > /mnt/resource/result""
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "scp -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@${vm1privateip}:/mnt/resource/result /home/$USERNAME/"
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@${vm1privateip} -t -t 'rm /mnt/resource/scratch/result'"
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@${vm1privateip} -t -t "bash /mnt/resource/scratch/fullpingpong.sh > /mnt/resource/scratch/result""
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "scp -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@${vm1privateip}:/mnt/resource/scratch/result /home/$USERNAME/"
 				# 多段の場合、ローカルにもダウンロードが必要
 				echo "copying the result from vm1 to local"
 				scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1privateip}":/home/$USERNAME/ ./
@@ -1528,7 +1528,7 @@ EOL
 			checkfstabpbs=$(cat checkfstabpbs | wc -l)
 			if [ $((checkfstabpbs)) -ge 2 ]; then 
 				echo "pbsnode: deleting dupulicated settings...."
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo sed -i -e '/\/dev/sdc1    \/mnt\/share/d' /etc/fstab"
+				#ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo sed -i -e '/\/dev/sdc1    \/mnt\/share/d' /etc/fstab"
 				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo sed -i -e '$ a /dev/sdc1    /mnt/share' /etc/fstab"
 			elif [ $((checkfstabpbs)) -eq 1 ]; then
 				echo "pbsnode: correct fstab setting"
