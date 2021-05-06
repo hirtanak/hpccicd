@@ -1,0 +1,17 @@
+name: 00dummy
+on:
+  push:
+    branches: [main]
+    paths:
+      - senarios/test0
+
+jobs:
+  dummy:
+    runs-on: ubuntu-latest
+    steps:
+      # スクリプト実行には事前にリポジトリのチェックアウトが必要
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: "dummy step01"
+        run: uname

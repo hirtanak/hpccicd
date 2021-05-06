@@ -1,0 +1,98 @@
+name: 03azure_cleanup
+on:
+  push:
+    paths:
+      - senarios/cleanup
+
+jobs:
+
+  cleanup:
+    name: cleanup after success
+    runs-on: ubuntu-latest
+    # on.push.paths と on.push.branch の && は利用できないため回避策
+    if: github.ref == 'refs/heads/main'    
+    needs: success
+    env:
+      MyResourceGroup: tmcbmgt01-hpccicd01
+      VMPREFIX: hpccicd01
+      # secret
+      AZURE_NAME: ${{ secrets.AZURE_NAME }}
+      AZURE_PASSWORD: ${{ secrets.AZURE_PASSWORD }}
+      AZURE_TENANT: ${{ secrets.AZURE_TENANT }}
+      SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
+      SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+    steps:
+      # スクリプト実行には事前にリポジトリのチェックアウトが必要
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: "prep run script1"
+        run: |
+          curl -V
+          # curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+          # github actions だとsudoが必要
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          az version -o table
+      - name: "run script"
+        env:
+          SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+        run: |
+          # 設定ファイル変更反映
+          bash ./setupcreds.sh hpcbmtenv.sh
+
+          # SSH秘密鍵の設定
+          echo "setting ssh private key...."
+          echo "$SSH_SECRET_KEY" > ./${VMPREFIX}
+          md5sum ./${VMPREFIX}
+
+          # SSH公開鍵の設定
+          echo "setting ssh public key...."
+          echo "$SSH_PUBLIC_KEY" > ./${VMPREFIX}.pub
+          md5sum ./${VMPREFIX}.pub
+
+          # クルデンシャル
+          sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' /hpcbmtenv.sh
+          sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' /hpcbmtenv.sh
+          sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' /hpcbmtenv.sh
+
+          # スクリプト実行：削除
+          bash ./hpcbmtenv.sh updatensg
+          bash ./hpcbmtenv.sh delete-all
+
+  success:
+    name: notify teams with succuess in azure environmental status
+    runs-on: ubuntu-18.04
+    needs: cleanup
+    steps:
+      - uses: actions/checkout@master
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        if: always()
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          dry_run: False
+      - name: sucuess! 
+        run: |
+          echo '::success::Previous workflow was sucuess!'
+
+  if_failure:
+    name: notify teams with failure in azure environmental status
+    runs-on: ubuntu-18.04
+    needs: cleanup
+    steps:
+      - uses: actions/checkout@master
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        if: env.WORKFLOW_CONCLUSION == 'failure' # notify only if failure
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          dry_run: False
+      - name: make an error 
+        run: |
+          echo '::error::Previous workflow was failed'
