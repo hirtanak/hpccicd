@@ -48,6 +48,14 @@ echo "addtional accessible CIDR: $LIMITEDIP2"
 unset vm1ip
 vm1ip=$(az vm show -d -g $MyResourceGroup --name ${VMPREFIX}-1 --query publicIps -o tsv)
 echo "accessing vm1: $vm1ip"
+for count in $(seq 1 10); do
+	if [ -z "$vm1ip" ]; then 
+		vm1ip=$(az vm show -d -g $MyResourceGroup --name ${VMPREFIX}-1 --query publicIps -o tsv)
+		echo "sleep 2" & sleep 2
+	else
+		break
+	fi
+done
 if [ -z "$vm1ip" ]; then 
 	echo "can not get ${VMPREFIX}-1 ip address"
 	exit 1
@@ -55,8 +63,16 @@ fi
 
 # SSHアクセスチェック：VM#1
 unset checkssh
-checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i ${SSHKEYDIR} -t $USERNAME@"${vm1ip}" "uname")
+checkssh=$(ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t $USERNAME@"${vm1ip}" "uname")
 echo "accessing vm1 by ssh...: $checkssh"
+for count in $(seq 1 10); do
+	if [ -z "$checkssh" ]; then 
+		echo "sleep 2" & sleep 2
+		checkssh=$(ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t $USERNAME@"${vm1ip}" "uname")
+	else
+		break
+	fi
+done
 if [ -z "$checkssh" ]; then
 	echo "can not access ${VMPREFIX}-1 by ssh"
 	exit 1
