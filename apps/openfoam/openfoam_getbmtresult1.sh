@@ -31,7 +31,7 @@ CMDNAME=$(basename "$0")
 # コマンドオプションエラー処理
 if [ $# -eq 1 ]; then
 	echo "実行するには1個の引数が必要です。" 1>&2
-	exit 1
+	#exit 1
 fi
 
 # グローバルIPアドレスの取得・処理
