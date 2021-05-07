@@ -98,7 +98,9 @@ jobs:
           echo "ベンチマーク結果取得 @ bmtconf: $bmtconf"
           bash ./apps/openfoam/openfoam_getbmtresult1.sh ${bmtconf}
           logdate=$(cat ./logdate)
-          LOGDATE: $logdate
+          echo $logdate
+          echo "::set-output name=LOGDATE::${{ LOGDATE }}"
+          echo "LOGDATE: ${{ LOGDATE }}"
 
       - name: Upload benchmark result
         uses: actions/upload-artifact@v2.2.3
