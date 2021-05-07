@@ -140,6 +140,8 @@ checklink=$(${SSHCMD} "file  /mnt/share/OpenFOAM/OpenFOAM-v1906/platforms/linux6
 if [ -z "$checklink" ]; then
 	echo "making link"
 	${SSHCMD} "ln -s /mnt/share/OpenFOAM/OpenFOAM-v1906/platforms/linux64Gcc4_8_5DPInt32Opt /mnt/share/OpenFOAM/OpenFOAM-v1906/platforms/linux64GccDPInt320pt"
+else
+	echo "linker has already set."
 fi
 
 #========================================================================
@@ -157,6 +159,20 @@ fi
 # システムチェック実行：あとで調査
 ${SSHCMD} "/mnt/share/OpenFOAM/OpenFOAM-v1906/bin/foamSystemCheck" > checkfile
 checksystem=$(cat checkfile | grep "System check:" | cut -d " " -f 3)
+echo "accessing vm1 by ssh...: $checkssh"
+for count in $(seq 1 10); do
+	if [ -z "$checksystem" ]; then 
+		echo "sleep 2" & sleep 2
+		${SSHCMD} "/mnt/share/OpenFOAM/OpenFOAM-v1906/bin/foamSystemCheck" > checkfile
+		checksystem=$(cat checkfile | grep "System check:" | cut -d " " -f 3)
+	else
+		break
+	fi
+done
+if [ -z "$checksystem" ]; then
+	echo "checksystem is : $checksystem. can not access ssh."
+	exit 1
+fi
 # checksytem 内の下位行削除
 checksystem=`echo ${checksystem} | sed -e "s/[\r\n]\+//g"`
 echo "checksystem: $checksystem"
