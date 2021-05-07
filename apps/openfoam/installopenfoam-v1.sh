@@ -136,8 +136,9 @@ else
 fi
 
 # リンカ設定
-checklink=$(${SSHCMD} "file  /mnt/share/OpenFOAM/OpenFOAM-v1906/platforms/linux64GccDPInt320pt")
-if [ -z "$checklink" ]; then
+checklink=$(${SSHCMD} "file /mnt/share/OpenFOAM/OpenFOAM-v1906/platforms/linux64GccDPInt320pt")
+checklink2=$(echo $checklink | grep "No such file or directory")
+if [ -n "$checklink2" ]; then
 	echo "making link"
 	${SSHCMD} "ln -s /mnt/share/OpenFOAM/OpenFOAM-v1906/platforms/linux64Gcc4_8_5DPInt32Opt /mnt/share/OpenFOAM/OpenFOAM-v1906/platforms/linux64GccDPInt320pt"
 else
