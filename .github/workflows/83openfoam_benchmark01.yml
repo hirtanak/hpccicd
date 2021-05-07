@@ -19,6 +19,8 @@ jobs:
       AZURE_TENANT: ${{ secrets.AZURE_TENANT }}
       SSH_SECRET_KEY: ${{ secrets.SSH_SECRET_KEY }}
       SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+    outputs:
+      logdate: ${{ steps.set_outputs_logdate.outputs.logdate }}
     steps:
       # スクリプト実行には事前にリポジトリのチェックアウトが必要
       - name: Check out repository
@@ -44,6 +46,7 @@ jobs:
           az version -o table
 
       - name: "run openfoam_bmttest1"
+        id: set_outputs_lotdate
         env:
           # secret
           AZURE_NAME: ${{ secrets.AZURE_NAME }}
@@ -98,13 +101,12 @@ jobs:
           echo "ベンチマーク結果取得 @ bmtconf: $bmtconf"
           bash ./apps/openfoam/openfoam_getbmtresult1.sh ${bmtconf}
           logdate=$(cat ./logdate)
-          echo $logdate
-          echo "::set-output name=LOGDATE::${{ LOGDATE }}"
-          echo "LOGDATE: ${{ LOGDATE }}"
+          echo "logdate: $logdate"
+          echo "::set-output name=logdate::$($logdate)"
 
       - name: Upload benchmark result
         uses: actions/upload-artifact@v2.2.3
         if: always() # 上記が失敗した場合、デフォルトだと exit 1 でステップが実行されない。 alwaysで実施
         with:
           name: damBreak-result
-          path: ./${{ LOGDATE }}
+          path: ./${{ steps.set_outputs_logdate.outputs.logdate }}
