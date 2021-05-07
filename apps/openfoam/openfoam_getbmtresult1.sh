@@ -84,8 +84,11 @@ for count in $(seq 1 "$casenum"); do
 	SSHCMD="tar zcf ./${count}-damBreak.tar.gz -T /mnt/share/${count}-damBreak/"
 done
 # ローカルへ転送
-scp -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@"${pbsvmip}":/home/$USERNAME/*-damBreak.tar.gz ./
-file ./*-damBreak.tar.gz | cut -d ":" -f 1 > resultlist
+logdate=$(date "+%Y%m%d_%H%M")
+echo $logdate > ./logdate
+mkdir -p damBreak-${logdate}
+scp -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@"${pbsvmip}":/home/$USERNAME/*-damBreak.tar.gz ./damBreak-${logdate}/
+#file ./*-damBreak.tar.gz | cut -d ":" -f 1 > resultlist
 
 
 echo "$CMDNAME: BENCHMARK - end of getting openfoam benchamrk result1"

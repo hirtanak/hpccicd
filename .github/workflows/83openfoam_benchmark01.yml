@@ -97,10 +97,14 @@ jobs:
           bash ./hpcbmtenv.sh updatensg
           echo "ベンチマーク結果取得 @ bmtconf: $bmtconf"
           bash ./apps/openfoam/openfoam_getbmtresult1.sh ${bmtconf}
+          logdate=$(cat ./logdate)
+          LOGDATE: $logdate
 
       - name: Upload benchmark result
         uses: actions/upload-artifact@v2.2.3
         if: always() # 上記が失敗した場合、デフォルトだと exit 1 でステップが実行されない。 alwaysで実施
         with:
           name: damBreak-result
-          path: ./*-damBreak.tar.gz
+          path: ./$LOGDATE
+        env:
+          LOGDATE: ${{ LOGDATE }}
