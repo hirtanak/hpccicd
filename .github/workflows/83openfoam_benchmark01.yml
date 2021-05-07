@@ -107,6 +107,4 @@ jobs:
         if: always() # 上記が失敗した場合、デフォルトだと exit 1 でステップが実行されない。 alwaysで実施
         with:
           name: damBreak-result
-          path: ./$LOGDATE
-        env:
-          LOGDATE: ${{ LOGDATE }}
+          path: ./${{ LOGDATE }}
