@@ -1,7 +1,7 @@
 #!/bin/bash
 # Repositry: https://github.com/hirtanak/hpcbmtenv
-# Last update: 2021/4/30
-SCRIPTVERSION=0.3.0
+# Last update: 2021/5/7
+SCRIPTVERSION=0.3.1
 
 echo "SCRIPTVERSION: $SCRIPTVERSION - startup azure hpc delopment create script..."
 
@@ -266,11 +266,23 @@ case $1 in
 		# テンポラリファイル削除
 		rm ./tmpfile
 		rm ./tmpfile2
-		
+
 		# 永続ディスクが必要な場合に設定可能
 		if [ $((PERMANENTDISK)) -gt 0 ]; then
 			az vm disk attach --new -g $MyResourceGroup --size-gb $PERMANENTDISK --sku Premium_LRS --vm-name ${VMPREFIX}-1 --name ${VMPREFIX}-1-disk0 -o table
 		fi
+
+		# SSHローケール設定変更
+		echo "configuring /etc/ssh/config locale setting"
+		for count in $(seq 1 $MAXVM); do
+			line=$(sed -n "${count}"P ./ipaddresslist)
+			locale=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "grep 'LC_ALL=C' /home/$USERNAME/.bashrc")
+			if [ -z "$locale" ]; then
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "echo "export 'LC_ALL=C'" >> /home/$USERNAME/.bashrc"
+			else
+				echo "LC_ALL=C has arelady setting"
+			fi
+		done
 
 		# fstab設定
 		echo "setting fstab"
@@ -306,14 +318,14 @@ case $1 in
 					# fstab 設定: az vm run-command
 					echo "${VMPREFIX}-${count}: configuring fstab by az vm run-command"
 					#az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo sed -i -e '/azure_resource-part1/d' /etc/fstab"
-					az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts 'sudo umount /dev/disk/cloud/azure_resource-part1'
+					#az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts 'sudo umount /dev/disk/cloud/azure_resource-part1'
 					# 重複していないかチェック
 					az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo grep "${mountip}:/mnt/resource/scratch" /etc/fstab" > checkfstab
 					checkfstab=$(cat checkfstab | wc -l)
-					if [ $((checkfstab)) -ge 2 ]; then 
+					if [ $((checkfstab)) -ge 2 ]; then
 						echo "deleting dupulicated settings...."
-						#az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
-							#--scripts "sudo sed -i -e '/${mountip}:\/mnt\/resource/d' /etc/fstab"
+						az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
+							--scripts "sudo sed -i -e '/${mountip}:\/mnt\/resource/d' /etc/fstab"
 						az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
 							--scripts "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
 					elif [ $((checkfstab)) -eq 1 ]; then
@@ -342,6 +354,7 @@ case $1 in
 				--scripts "sudo yum install --quiet -y nfs-utils epel-release && echo '/mnt/resource/scratch *(rw,no_root_squash,async)' >> /etc/exports"
 			az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-1 --command-id RunShellScript --scripts "sudo yum install --quiet -y htop"
 			sleep 5
+			az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-1 --command-id RunShellScript --scripts "sudo mkdir -p /mnt/resource/scratch"
 			az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-1 --command-id RunShellScript --scripts "sudo chown ${USERNAME}:${USERNAME} /mnt/resource/scratch"
 			az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-1 --command-id RunShellScript --scripts "sudo systemctl start rpcbind && sudo systemctl start nfs-server"
 			az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-1 --command-id RunShellScript --scripts "sudo systemctl enable rpcbind && sudo systemctl enable nfs-server"
@@ -358,6 +371,7 @@ case $1 in
 			# アフターインストール：epel-release
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo yum install --quiet -y htop"
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "echo '/mnt/resource/scratch *(rw,no_root_squash,async)' | sudo tee /etc/exports"
+			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo mkdir -p /mnt/resource/scratch"
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo chown ${USERNAME}:${USERNAME} /mnt/resource/scratch"
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo systemctl start rpcbind && sudo systemctl start nfs-server"
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo systemctl enable rpcbind && sudo systemctl enable nfs-server"
@@ -392,7 +406,7 @@ case $1 in
 		parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo chown $USERNAME:$USERNAME /mnt/resource/scratch""
 		parallel -a ipaddresslist-tmp "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mount -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch""
 		rm ./ipaddresslist-tmp
-		
+
 		# NFSサーバ・マウント設定
 		for count in $(seq 2 $MAXVM); do
 			line=$(sed -n "${count}"P ./ipaddresslist)
@@ -411,7 +425,7 @@ case $1 in
 				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo yum install --quiet -y htop"
 				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo mkdir -p /mnt/resource/scratch"
 				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo chown $USERNAME:$USERNAME /mnt/resource/scratch"
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo mount $DEBUG -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch"
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo mount -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch"
 			else
 				echo "${VMPREFIX}-2 to ${MAXVM}: ${count} setting by az vm run-command"
 				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts 'sudo yum install --quiet -y nfs-utils epel-release'
@@ -419,7 +433,7 @@ case $1 in
 				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts 'sudo yum install --quiet -y htop'
 				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mkdir -p /mnt/resource/scratch"
 				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo chown $USERNAME:$USERNAME /mnt/resource/scratch"
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mount $DEBUG -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch"
+				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo mount -t nfs ${mountip}:/mnt/resource/scratch /mnt/resource/scratch"
 			fi
 		done
 		echo "end of mouting ${mountip}:/mnt/resource/scratch"
@@ -443,16 +457,6 @@ EOL
 			line=$(sed -n "${count}"P ./ipaddresslist)
 			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./config $USERNAME@"${line}":/home/$USERNAME/.ssh/config
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "chmod 600 /home/$USERNAME/.ssh/config"
-		done
-		# SSHローケール設定変更
-		echo "configuring /etc/ssh/config locale setting"
-		for count in $(seq 1 $MAXVM); do
-			locale=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "grep 'LC_ALL=C' /home/$USERNAME/.bashrc")
-			if [ -z "$locale" ]; then
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "echo "export 'LC_ALL=C'" >> /home/$USERNAME/.bashrc"
-			else
-				echo "LC_ALL=C has arelady setting"
-			fi
 		done
 		# ホストファイル事前バックアップ（PBSノード追加設定向け）
 		echo "backup original hosts file"
