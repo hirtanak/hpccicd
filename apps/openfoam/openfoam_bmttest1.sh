@@ -49,7 +49,7 @@ echo "addtional accessible CIDR: $LIMITEDIP2"
 # PBS VM IPアドレス取得
 unset pbsvmip
 pbsvmip=$(az vm show -d -g $MyResourceGroup --name ${VMPREFIX}-pbs --query publicIps -o tsv)
-echo "accessing vm1: $pbsvmip"
+echo "accessing pbs vm...: $pbsvmip"
 if [ -z "$pbsvmip" ]; then
 	echo "can not get ${VMPREFIX}-pbs ip address"
 	exit 1
@@ -57,7 +57,16 @@ fi
 
 # SSHアクセスチェック
 unset checkssh
-checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i ${SSHKEYDIR} -t $USERNAME@"${pbsvmip}" "uname")
+checkssh=$(ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t $USERNAME@"${pbsvmip}" "uname")
+for count in $(seq 1 10); do
+	checkssh=$(ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t $USERNAME@"${pbsvmip}" "uname")
+	if [ -n "$checkssh" ]; then
+		break
+	else
+		checkssh=$(ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t $USERNAME@"${pbsvmip}" "uname")
+		echo "sleep 2" & sleep 2
+	fi
+done
 if [ -z "$checkssh" ]; then
 	echo "can not access ${VMPREFIX}-pbs by ssh"
 	exit 1

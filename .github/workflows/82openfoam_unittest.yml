@@ -71,7 +71,7 @@ jobs:
           grep "MyResourceGroup=" ./apps/openfoam/openfoam_unittest1.sh | head -n 1
           grep "VMPREFIX=" ./apps/openfoam/openfoam_unittest1.sh | head -n 1
           grep "MAXVM=" ./apps/openfoam/openfoam_unittest1.sh | head -n 1
-          grep "azure_*" ./apps/openfoam/openfoam_unittest1.sh  | head -n 3
+          grep "azure_*" ./apps/openfoam/openfoam_unittest1.sh  | head -n 2
          
           sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./apps/openfoam/openfoam_unittest1.sh
           sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./apps/openfoam/openfoam_unittest1.sh
