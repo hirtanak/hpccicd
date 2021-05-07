@@ -152,8 +152,7 @@ fi
 #$HOME/OpenFOAM/azureuser-v1712/platforms/linux64Gcc4_8_5DPInt32Opt/bin/sphereSurfactantFoam
 #→ このバイナリファイルだけマニュアルで
 #   $HOME/apps/OpenFOAM/OpenFOAM-v1712/platforms/linux64Gcc4_8_5DPInt32Opt/bin へ複製すること。
-#   他のVersionでは、上記ディレクトリに正しく生成される。
-#以下の処理を追加する。
+#   他のVersionでは、上記ディレクトリに正しく生成される。#以下の処理を追加する。
 #> cp $HOME/OpenFOAM/azureuser-v1712/platforms/linux64Gcc4_8_5DPInt32Opt/bin/sphereSurfactantFoam $HOME/apps/OpenFOAM/OpenFOAM-v1712/platforms/linux64Gcc4_8_5DPInt32Opt/bin
 #> \rm -rf $HOME/OpenFOAM
 

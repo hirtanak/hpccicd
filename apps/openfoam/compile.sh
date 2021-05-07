@@ -16,7 +16,7 @@ if [ -n "$OPENFOAM_VERSION" ]; then
     echo "In compile.sh - IN FOR v1712 SPEFIC PROCESSING"
     cp "$HOMEDIR"/OpenFOAM/"$CUSER"-v1712/platforms/linux64Gcc4_8_5DPInt32Opt/bin/sphereSurfactantFoam /mnt/exports/apps/OpenFOAM/OpenFOAM-v1712/platforms/linux64Gcc4_8_5DPInt32Opt/bin
     # check \rm or rm
-    rm -rf "$HOMEDIR"/OpenFOAM
+    # rm -rf "$HOMEDIR"/OpenFOAM
   fi
   if [ -d /mnt/exports/apps/OpenFOAM/OpenFOAM-"$OPENFOAM_VERSION"/platforms ] && [ -w /mnt/exports/apps/OpenFOAM/OpenFOAM-"$OPENFOAM_VERSION"/platforms ]; then
     cd /mnt/exports/apps/OpenFOAM/OpenFOAM-"$OPENFOAM_VERSION"/platforms || exit

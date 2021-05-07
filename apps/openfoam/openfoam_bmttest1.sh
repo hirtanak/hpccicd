@@ -52,7 +52,7 @@ pbsvmip=$(az vm show -d -g $MyResourceGroup --name ${VMPREFIX}-pbs --query publi
 echo "accessing pbs vm...: $pbsvmip"
 if [ -z "$pbsvmip" ]; then
 	echo "can not get ${VMPREFIX}-pbs ip address"
-	exit 1
+	# exit 1
 fi
 
 # SSHアクセスチェック
