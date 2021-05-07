@@ -9,8 +9,8 @@ if [ -z "${BMTCONF}" ]; then
 fi
 OPENFORM_VERSION="v1906"
 
-MyResourceGroup=tmcbmt01-hpccicd01
-VMPREFIX=hpccicd01
+MyResourceGroup=tmcbmt01
+VMPREFIX=tmcbmt01
 USERNAME=azureuser # ユーザ名: デフォルト azureuser
 # SSH公開鍵ファイルを指定：デフォルトではカレントディレクトリを利用する
 # SSHKEYFILE="./${VMPREFIX}.pub"
@@ -56,11 +56,21 @@ fi
 
 # SSHアクセスチェック
 unset checkssh
-checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i ${SSHKEYDIR} -t $USERNAME@"${pbsvmip}" "uname")
+checkssh=$(ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t $USERNAME@"${pbsvmip}" "uname")
+for count in $(seq 1 10); do
+	checkssh=$(ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t $USERNAME@"${pbsvmip}" "uname")
+	if [ -n "$checkssh" ]; then
+		break
+	else
+		checkssh=$(ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} -t $USERNAME@"${pbsvmip}" "uname")
+		echo "sleep 2" & sleep 2
+	fi
+done
 if [ -z "$checkssh" ]; then
 	echo "can not access ${VMPREFIX}-pbs by ssh"
 	exit 1
 fi
+
 SSHCMD="ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@${pbsvmip} -t -t"
 
 # ベンチマークケースパラメータ生成
