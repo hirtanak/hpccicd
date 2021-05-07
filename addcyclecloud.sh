@@ -80,12 +80,12 @@ az vm create --resource-group $MyResourceGroup --location $Location \
 # SSHアクセスチェック：CycleCloud
 cycleip=$(az vm show -d -g $MyResourceGroup --name ${CYCLECLOUDNAME} --query publicIps -o tsv)
 unset checkssh
-for count in 1 8; do
-	checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i "${SSHKEYDIR}" -t $USERNAME@"${cycleip}" "uname")
+for count in 1 10; do
+	checkssh=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" -t $USERNAME@"${cycleip}" "uname")
 	if [ -n "$checkssh" ]; then
 		break
 	fi
-	echo "${count}: sleep 15" && sleep 15
+	echo "${count}: sleep 2" && sleep 2
 done
 if [ -z "$checkssh" ]; then
 	echo "can not access Azure CycleCloud by ssh"
