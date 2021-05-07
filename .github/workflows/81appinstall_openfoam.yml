@@ -81,6 +81,6 @@ jobs:
           sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./apps/openfoam/installopenfoam-v1.sh
           sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./apps/openfoam/installopenfoam-v1.sh
 
-          bash ./hpcbmtenv.sh updatensg     
+          bash ./hpcbmtenv.sh updatensg
           # 引数1: OpenFOAMバージョン
           bash ./apps/openfoam/installopenfoam-v1.sh v1906

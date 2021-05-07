@@ -53,7 +53,8 @@ jobs:
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
           echo "applying setupcreds.sh..."
-          bash ./setupcreds.sh openfoam_bmttest1.sh
+          bash ./setupcreds.sh hpcbmtenv.sh
+          bash ./setupcreds.sh apps/openfoam/openfoam_bmttest1.sh
 
           echo "setting ssh private key...."
           echo "$SSH_SECRET_KEY" > ./${VMPREFIX}
@@ -68,6 +69,9 @@ jobs:
           grep "MAXVM=" ./apps/openfoam/openfoam_bmttest1.sh | head -n 1
           grep "USERNAME=" ./apps/openfoam/openfoam_bmttest1.sh  | head -n 1
           
+          sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./hpcbmtenv.sh
+          sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./hpcbmtenv.sh
+          sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./hpcbmtenv.sh
           sed -i -e 's!^#azure_name="uuid"!azure_name="${{ secrets.AZURE_NAME }}"!' ./apps/openfoam/openfoam_bmttest1.sh
           sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./apps/openfoam/openfoam_bmttest1.sh
           sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./apps/openfoam/openfoam_bmttest1.sh
@@ -89,6 +93,7 @@ jobs:
           sed -i -e 's!^#azure_password="uuid"!azure_password="${{ secrets.AZURE_PASSWORD }}"!' ./apps/openfoam/openfoam_getbmtresult1.sh
           sed -i -e 's!^#azure_tenant="uuid"!azure_tenant="${{ secrets.AZURE_TENANT }}"!' ./apps/openfoam/openfoam_getbmtresult1.sh
 
+          bash ./hpcbmtenv.sh updatensg
           echo "ベンチマーク結果取得 @ bmtconf: $bmtconf"
           bash ./apps/openfoam/openfoam_getbmtresult1.sh ${bmtconf}
 
