@@ -1604,8 +1604,8 @@ EOL
 		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mount -t nfs ${pbsmountip}:/mnt/share /mnt/share""
 		for count in $(seq 1 $MAXVM); do
 			line=$(sed -n "${count}"P ./ipaddresslist)
-			echo "VM: ${VMPREFIX}-${count}\'s mouting..."
-			ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "df -h | grep ${pbsmountip}:"
+			echo "VM: ${VMPREFIX}-${count}'s mouning..."
+			ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@${count} -t -t "df -h | grep ${pbsmountip}:"
 		done
 		# PBSノード：インストール準備
 		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo yum install --quiet -y md5sum"
