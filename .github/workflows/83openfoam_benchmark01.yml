@@ -80,6 +80,7 @@ jobs:
           echo "using benchmark setting... ./apps/openfoam/20210425-bmtconf-01"
           bmtconf=$(cat ./senarios/bmtconf)
 
+          bash ./hpcbmtenv.sh updatensg
           echo "ベンチマーク実施 @ bmtconf: $bmtconf"
           bash ./apps/openfoam/openfoam_bmttest1.sh ${bmtconf}
 
