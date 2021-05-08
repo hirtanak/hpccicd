@@ -124,6 +124,9 @@ function getipaddresslist () {
 	# $2: ipaddresslist
 	# $3: nodelist
 	# list-ip-addresses 作成
+	if [ -f ./vmlist ]; then rm ./vmlist; fi
+	if [ -f ./ipaddresslist ]; then rm ./ipaddresslist; fi
+	if [ -f ./nodelist ]; then rm ./nodelist; fi
 	echo "creating vmlist and ipaddresslist"
 	az vm list-ip-addresses -g $MyResourceGroup --query "[].virtualMachine[].{Name:name, PublicIp:network.publicIpAddresses[0].ipAddress, PrivateIPAddresses:network.privateIpAddresses[0]}" -o tsv > tmpfile
 	for count in $(seq 1 10); do
@@ -194,7 +197,7 @@ function getipaddresslist () {
 }
 
 function mountdirectory () {
-	# $1: vm:  vm1 or pbs
+	# $1: vm: vm1 or pbs
 	# $2: directory: /mnt/resource/scrach or /mnt/share
 	# requirement, ipaddresslist
 	# case1: vm1, /mnt/resource/scratch, case2: pbs /mnt/share
@@ -322,9 +325,9 @@ function checksshconnection () {
 	esac
 }
 
-function settingpasswordless () {
+function basicsettings () {
 	# 作成中。。。
-	# $1: vm1, pbs, all, 2-n, login
+	# $1: vm1, pbs, login, all
 	# requirement, ipaddresslist
 	# locale, sudo, passwordless, ssh config
 	case $1 in
@@ -339,6 +342,21 @@ function settingpasswordless () {
 			else
 				echo "LC_ALL=C has arelady setting"
 			fi
+			# コンピュートノード：パスワードレス設定
+			echo "コンピュートノード: confugring passwordless settings"
+			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX} $USERNAME@"${vm1ip}":/home/$USERNAME/.ssh/${VMPREFIX}
+			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX} $USERNAME@"${vm1ip}":/home/$USERNAME/.ssh/id_rsa
+			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "chmod 600 /home/$USERNAME/.ssh/id_rsa"
+			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX}.pub $USERNAME@"${vm1ip}":/home/$USERNAME/.ssh/${VMPREFIX}.pub
+			# SSH Config設定
+			if [ -f ./config ]; then rm ./config; fi
+cat <<'EOL' >> config
+Host *
+StrictHostKeyChecking no
+UserKnownHostsFile=/dev/null
+EOL
+			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./config $USERNAME@"${vm1ip}":/home/$USERNAME/.ssh/config
+			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "chmod 600 /home/$USERNAME/.ssh/config"
 		;;
 		pbs )
 			echo "pbs: all basic settings...."
@@ -366,8 +384,41 @@ function settingpasswordless () {
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "chmod 600 /home/$USERNAME/.ssh/id_rsa"
 			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX}.pub $USERNAME@"${pbsvmip}":/home/$USERNAME/.ssh/${VMPREFIX}.pub
 			# SSH Config設定
+			if [ -f ./config ]; then rm ./config; fi
+cat <<'EOL' >> config
+Host *
+StrictHostKeyChecking no
+UserKnownHostsFile=/dev/null
+EOL
 			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./config $USERNAME@"${pbsvmip}":/home/$USERNAME/.ssh/config
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "chmod 600 /home/$USERNAME/.ssh/config"
+		;;
+		login )
+			echo "login vm: all basic settings...."
+			loginvmip=$(az vm show -d -g $MyResourceGroup --name ${VMPREFIX}-login --query publicIps -o tsv)
+			# SSHローケール設定変更
+			echo "configuring /etc/ssh/config locale setting"
+			locale=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "grep 'LC_ALL=C' /home/$USERNAME/.bashrc")
+			if [ -z "$locale" ]; then
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "echo "export 'LC_ALL=C'" >> /home/$USERNAME/.bashrc"
+			else
+				echo "LC_ALL=C has arelady setting"
+			fi
+			# ログインノード：パスワードレス設定
+			echo "ログインノード: confugring passwordless settings"
+			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX} $USERNAME@"${loginvmip}":/home/$USERNAME/.ssh/${VMPREFIX}
+			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX} $USERNAME@"${loginvmip}":/home/$USERNAME/.ssh/id_rsa
+			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "chmod 600 /home/$USERNAME/.ssh/id_rsa"
+			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX}.pub $USERNAME@"${loginvmip}":/home/$USERNAME/.ssh/${VMPREFIX}.pub
+			# SSH Config設定
+			if [ -f ./config ]; then rm ./config; fi
+cat <<'EOL' >> config
+Host *
+StrictHostKeyChecking no
+UserKnownHostsFile=/dev/null
+EOL
+			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./config $USERNAME@"${loginvmip}":/home/$USERNAME/.ssh/config
+			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "chmod 600 /home/$USERNAME/.ssh/config"
 		;;
 		all )
 			# SSHローケール設定変更
@@ -381,40 +432,45 @@ function settingpasswordless () {
 					echo "LC_ALL=C has arelady setting"
 				fi
 			done
-		;;
-		2-n )
-		# SSHローケール設定変更
-		echo "configuring /etc/ssh/config locale setting"
-		for count in $(seq 1 $MAXVM); do
-			line=$(sed -n "${count}"P ./ipaddresslist)
-			locale=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "grep 'LC_ALL=C' /home/$USERNAME/.bashrc")
-			if [ -z "$locale" ]; then
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "echo "export 'LC_ALL=C'" >> /home/$USERNAME/.bashrc"
-			else
-				echo "LC_ALL=C has arelady setting"
-			fi
-		done
-		;;
-		login )
-			# ログインノード：パスワードレス設定
-			echo "ログインノード: confugring passwordless settings"
-			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX} $USERNAME@"${loginvmip}":/home/$USERNAME/.ssh/${VMPREFIX}
-			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX} $USERNAME@"${loginvmip}":/home/$USERNAME/.ssh/id_rsa
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "chmod 600 /home/$USERNAME/.ssh/id_rsa"
-			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX}.pub $USERNAME@"${loginvmip}":/home/$USERNAME/.ssh/${VMPREFIX}.pub
-			# SSH Config設定
-			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./config $USERNAME@"${loginvmip}":/home/$USERNAME/.ssh/config
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "chmod 600 /home/$USERNAME/.ssh/config"
+			echo "${VMPREFIX}-1 to ${MAXVM}: sudo 設定"
+			for count in $(seq 1 $((MAXVM))); do
+				line=$(sed -n "${count}"P ./ipaddresslist)
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo cat /etc/sudoers | grep $USERNAME" > sudotmp
+				if [ -z "$sudotmp" ]; then
+					echo "sudo: setting by ssh command"
+					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "echo "$USERNAME ALL=NOPASSWD: ALL" | sudo tee -a /etc/sudoers"
+					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo grep $USERNAME /etc/sudoers"
+					unset sudotmp && rm ./sudotmp
+				else
+					echo "sudo: setting by run-command"
+					az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "echo '$USERNAME ALL=NOPASSWD: ALL' | sudo tee -a /etc/sudoers"
+				fi
+			done
+			for count in $(seq 1 $((MAXVM))); do
+				line=$(sed -n "${count}"P ./ipaddresslist)
+				# コンピュートノード：パスワードレス設定
+				echo "コンピュートノード: confugring passwordless settings"
+				scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX} $USERNAME@"${line}":/home/$USERNAME/.ssh/${VMPREFIX}
+				scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX} $USERNAME@"${line}":/home/$USERNAME/.ssh/id_rsa
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "chmod 600 /home/$USERNAME/.ssh/id_rsa"
+				scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX}.pub $USERNAME@"${line}":/home/$USERNAME/.ssh/${VMPREFIX}.pub
+				# SSH Config設定
+			if [ -f ./config ]; then rm ./config; fi
+cat <<'EOL' >> config
+Host *
+StrictHostKeyChecking no
+UserKnownHostsFile=/dev/null
+EOL
+				scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./config $USERNAME@"${line}":/home/$USERNAME/.ssh/config
+				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "chmod 600 /home/$USERNAME/.ssh/config"
+			done
 		;;
 	esac
 }
 
 case $1 in
 	create )
-		# クリーンナップファイル
-		if [ -f ./vmlist ]; then rm ./vmlist; fi
-		if [ -f ./ipaddresslist ]; then rm ./ipaddresslist; fi
-		### 全体環境作成
+		# 全体環境作成
 		az group create --resource-group $MyResourceGroup --location $Location --tags "$TAG" --output none
 		# ネットワークチェック
 		tmpnetwork=$(az network vnet show -g $MyResourceGroup --name $MyNetwork --query id)
@@ -505,6 +561,7 @@ case $1 in
 				--admin-username $USERNAME --ssh-key-values $SSHKEYFILE \
 				--no-wait --tags "$TAG" -o table
 		done
+
 		# IPアドレスが取得できるまで停止する
 		if [ $((MAXVM)) -ge 20 ]; then
 			echo "sleep 90" && sleep 90
@@ -520,29 +577,8 @@ case $1 in
 			az vm disk attach --new -g $MyResourceGroup --size-gb $PERMANENTDISK --sku Premium_LRS --vm-name ${VMPREFIX}-1 --name ${VMPREFIX}-1-disk0 -o table
 		fi
 
-		# waiting for getting ssh connectivity.
-		for count in $(seq 2 $MAXVM); do
-			line=$(sed -n "${count}"P ./ipaddresslist)
-			for cnt in $(seq 1 12); do
-				checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i "${SSHKEYDIR}" -t $USERNAME@"${line}" "uname")
-				if [ -n "$checkssh" ]; then
-					break
-				fi
-				echo "waiting sshd @ ${VMPREFIX}-${count}: sleep 10" && sleep 10
-			done
-		done
-
-		# SSHローケール設定変更
-		echo "configuring /etc/ssh/config locale setting"
-		for count in $(seq 1 $MAXVM); do
-			line=$(sed -n "${count}"P ./ipaddresslist)
-			locale=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "grep 'LC_ALL=C' /home/$USERNAME/.bashrc")
-			if [ -z "$locale" ]; then
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "echo "export 'LC_ALL=C'" >> /home/$USERNAME/.bashrc"
-			else
-				echo "LC_ALL=C has arelady setting"
-			fi
-		done
+		# all computenodes: basicsettings - locale, sudo, passwordless, sshd
+		basicsettings all
 
 		# fstab設定
 		echo "setting fstab"
@@ -628,22 +664,6 @@ case $1 in
 			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${vm1ip}" -t -t "sudo showmount -e"
 		fi
 
-		# sudo設定
-		echo "${VMPREFIX}-2 to ${MAXVM}: sudo 設定"
-		for count in $(seq 1 $((MAXVM-1))); do
-			line=$(sed -n "${count}"P ./ipaddresslist-tmp)
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo cat /etc/sudoers | grep $USERNAME" > sudotmp
-			if [ -z "$sudotmp" ]; then
-				echo "sudo: setting by ssh command"
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "echo "$USERNAME ALL=NOPASSWD: ALL" | sudo tee -a /etc/sudoers"
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo grep $USERNAME /etc/sudoers"
-			unset sudotmp && rm ./sudotmp
-			else
-				echo "sudo: setting by run-command"
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "echo '$USERNAME ALL=NOPASSWD: ALL' | sudo tee -a /etc/sudoers"
-			fi
-		done
-
 		# 高速化のためにSSHで一括設定しておく
 		echo "ssh parallel settings: nfs client"
 		# 1行目を削除したIPアドレスリストを作成
@@ -659,28 +679,6 @@ case $1 in
 		echo "${VMPREFIX}-2 to ${MAXVM}: mouting VM#1"
 		mountdirectory vm1
 		echo "${VMPREFIX}-2 to ${MAXVM}: end of mouting ${mountip}:/mnt/resource/scratch"
-
-		# SSHパスワードレスセッティング
-		echo "preparing for passwordless settings"
-		cat ./ipaddresslist
-		# SSH追加設定
-		if [ -f ./config ]; then rm ./config; fi
-cat <<'EOL' >> config
-Host *
-StrictHostKeyChecking no
-UserKnownHostsFile=/dev/null
-EOL
-		echo "configuring passwordless settings"
-		parallel -a ipaddresslist "scp -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i ${SSHKEYDIR} ./${VMPREFIX} $USERNAME@{}:/home/$USERNAME/.ssh/${VMPREFIX}"
-		parallel -a ipaddresslist "scp -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i ${SSHKEYDIR} ./${VMPREFIX} $USERNAME@{}:/home/$USERNAME/.ssh/id_rsa"
-		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i ${SSHKEYDIR} $USERNAME@{} -t -t "chmod 600 /home/$USERNAME/.ssh/id_rsa""
-		parallel -a ipaddresslist "scp -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i ${SSHKEYDIR} ./${VMPREFIX}.pub $USERNAME@{}:/home/$USERNAME/.ssh/${VMPREFIX}.pub"
-		# SSH追加設定
-		for count in $(seq 1 $MAXVM) ; do
-			line=$(sed -n "${count}"P ./ipaddresslist)
-			scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./config $USERNAME@"${line}":/home/$USERNAME/.ssh/config
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "chmod 600 /home/$USERNAME/.ssh/config"
-		done
 
 		# ホストファイル事前バックアップ（PBSノード追加設定向け）
 		echo "backup original hosts file"
@@ -965,6 +963,7 @@ EOL
 			--image $IMAGE \
 			--admin-username $USERNAME --ssh-key-values $SSHKEYFILE \
 			--tags "$TAG" -o table
+
 		# LoginノードIPアドレス取得
 		loginvmip=$(az vm show -d -g $MyResourceGroup --name ${VMPREFIX}-login --query publicIps -o tsv)
 		echo "$loginvmip" > ./loginvmip
@@ -976,42 +975,9 @@ EOL
 			az vm disk attach --new -g $MyResourceGroup --size-gb $PBSPERMANENTDISK --sku Premium_LRS --vm-name ${VMPREFIX}-pbs --name ${VMPREFIX}-pbs-disk0 -o table || \
 				az vm disk attach -g $MyResourceGroup --vm-name ${VMPREFIX}-pbs --name ${VMPREFIX}-pbs-disk0 -o table
 		fi
-		# SSHパスワードレスセッティング
-		echo "pbsnode: prparing passwordless settings"
-		# カレントディレクトににファイルがない場合にのみ、SSH config設定作成
-		if [ ! -f ./config ]; then
-		cat <<'EOL' >> config
-Host *
-StrictHostKeyChecking no
-UserKnownHostsFile=/dev/null
-EOL
-		fi
-		# ログインノード：パスワードレス設定
-		echo "ログインノード: confugring passwordless settings"
-		scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX} $USERNAME@"${loginvmip}":/home/$USERNAME/.ssh/${VMPREFIX}
-		scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX} $USERNAME@"${loginvmip}":/home/$USERNAME/.ssh/id_rsa
-		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "chmod 600 /home/$USERNAME/.ssh/id_rsa"
-		scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX}.pub $USERNAME@"${loginvmip}":/home/$USERNAME/.ssh/${VMPREFIX}.pub
-		# SSH Config設定
-		scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./config $USERNAME@"${loginvmip}":/home/$USERNAME/.ssh/config
-		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${loginvmip}" -t -t "chmod 600 /home/$USERNAME/.ssh/config"
-		# PBSノード：パスワードレス設定
-		echo "PBSノード: confugring passwordless settings"
-		scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX} $USERNAME@"${pbsvmip}":/home/$USERNAME/.ssh/${VMPREFIX}
-		scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX} $USERNAME@"${pbsvmip}":/home/$USERNAME/.ssh/id_rsa
-		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "chmod 600 /home/$USERNAME/.ssh/id_rsa"
-		scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./${VMPREFIX}.pub $USERNAME@"${pbsvmip}":/home/$USERNAME/.ssh/${VMPREFIX}.pub
-		# SSH Config設定
-		scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./config $USERNAME@"${pbsvmip}":/home/$USERNAME/.ssh/config
-		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "chmod 600 /home/$USERNAME/.ssh/config"
-		# PBSノード：sudo設定
-		echo "PBSノード: sudo 設定"
-		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo cat /etc/sudoers | grep $USERNAME" > sudotmp
-		sudotmp=$(cat ./sudotmp)
-		if [ -z "$sudotmp" ]; then
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "echo "$USERNAME ALL=NOPASSWD: ALL" | sudo tee -a /etc/sudoers"
-		fi
-		unset sudotmp && rm ./sudotmp
+
+		# all computenodes: basicsettings - locale, sudo, passwordless, sshd
+		basicsettings pbs
 
 		# PBSノード：ディスクフォーマット
 		echo "pbsnode: /dev/sdc disk formatting"
@@ -1041,15 +1007,6 @@ EOL
 			fi
 		fi
 		unset diskformat && unset diskformat2 && unset diskformat3
-
-		# SSHローケール設定変更
-		echo "configuring /etc/ssh/config locale setting"
-		locale=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "grep 'LC_ALL=C' /home/$USERNAME/.bashrc")
-		if [ -z "$locale" ]; then
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "echo "export 'LC_ALL=C'" >> /home/$USERNAME/.bashrc"
-		else
-			echo "LC_ALL=C has arelady setting"
-		fi
 
 		# fstab設定
 		echo "pbsnode: setting fstab"
@@ -1112,23 +1069,7 @@ EOL
 		# コンピュートノード：NFSマウント設定
 		pbsmountip=$(az vm show -g $MyResourceGroup --name ${VMPREFIX}-pbs -d --query privateIps -otsv)
 		echo "pbsnode: mouting new directry on compute nodes: /mnt/share"
-		# for github actions
-		if [ ! -f ./ipaddresslist ]; then
-			# vmlist 作成
-			echo "ipaddresslist is nothing...creating ipaddresslist"
-			getipaddresslist vmlist ipaddresslist
-			# ipaddresslist 作成
-			echo "ipaddresslist file contents"
-			cat ./ipaddresslist
-		fi
-		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mkdir -p /mnt/share""
-		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo chown $USERNAME:$USERNAME /mnt/share""
-		parallel -a ipaddresslist "ssh -o StrictHostKeyChecking=no -i ${SSHKEYDIR} $USERNAME@{} -t -t "sudo mount -t nfs ${pbsmountip}:/mnt/share /mnt/share""
-		for count in $(seq 1 $MAXVM); do
-			line=$(sed -n "${count}"P ./ipaddresslist)
-			echo "VM: ${VMPREFIX}-${count}'s mouning..."
-			ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "df -h | grep ${pbsmountip}:"
-		done
+		mountdirectory pbs
 
 		# ローカル：openPBSバイナリダウンロード
 		# PBSノード：CentOS バージョンチェック
@@ -1560,11 +1501,11 @@ EOL
 		azure_sku2="Premium_LRS"
 		disktmp=$(az vm show -g $MyResourceGroup --name "${VMPREFIX}"-"${2}" --query storageProfile.osDisk.managedDisk.id -o tsv)
 		echo "converting computing node OS disk"
-		az disk update --sku ${azure_sku2} --ids ${disktmp} -o none
+		az disk update --sku ${azure_sku2} --ids "${disktmp}" -o none
 		echo "starting VM ${VMPREFIX}-1"
 		az vm start -g $MyResourceGroup --name "${VMPREFIX}"-1 -o none
 		echo "starting VM ${VMPREFIX}:2-$MAXVM compute nodes"
-		az vm start -g $MyResourceGroup --name ${VMPREFIX}-${2} -o none
+		az vm start -g $MyResourceGroup --name ${VMPREFIX}-"${2}" -o none
 		echo "checking $MAXVM compute VM's status"
 		sleep 30
 
@@ -2052,6 +1993,9 @@ EOL
 	;;
 	ssh )
 		# SSHアクセスする
+		if [ ! -f ./ipaddresslist ]; then 
+			getipaddresslist vmlist ipaddresslist
+		fi
 		case ${2} in
 			login )
 				loginvmip=$(az vm show -d -g $MyResourceGroup --name "${VMPREFIX}"-pbs --query publicIps -o tsv)
