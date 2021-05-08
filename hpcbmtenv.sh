@@ -562,20 +562,20 @@ case $1 in
 				--no-wait --tags "$TAG" -o table
 		done
 
-		# IPアドレスが取得できるまで停止する
-		if [ $((MAXVM)) -ge 20 ]; then
-			echo "sleep 90" && sleep 90
-		else
-			echo "sleep 45" && sleep 45
-		fi
-
-		# vmlist and ipaddress 作成
-		getipaddresslist vmlist ipaddresslist
-
 		# 永続ディスクが必要な場合に設定可能
 		if [ $((PERMANENTDISK)) -gt 0 ]; then
 			az vm disk attach --new -g $MyResourceGroup --size-gb $PERMANENTDISK --sku Premium_LRS --vm-name ${VMPREFIX}-1 --name ${VMPREFIX}-1-disk0 -o table
 		fi
+
+		# IPアドレスが取得できるまで停止する
+		if [ $((MAXVM)) -ge 20 ]; then
+			echo "sleep 180" && sleep 180
+		else
+			echo "sleep 90" && sleep 90
+		fi
+
+		# vmlist and ipaddress 作成
+		getipaddresslist vmlist ipaddresslist
 
 		# all computenodes: basicsettings - locale, sudo, passwordless, sshd
 		basicsettings all
@@ -627,13 +627,13 @@ case $1 in
 
 		echo "setting up nfs server"
 		vm1ip=$(head -n 1 ./ipaddresslist)
-			for count in $(seq 1 15); do
-				checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i "${SSHKEYDIR}" -t $USERNAME@"${vm1ip}" "uname")
-				if [ -n "$checkssh" ]; then
-					break
-				fi
-				echo "waiting sshd @ ${VMPREFIX}-1: sleep 10" && sleep 10
-			done
+		for count in $(seq 1 15); do
+			checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 5' -i "${SSHKEYDIR}" -t $USERNAME@"${vm1ip}" "uname")
+			if [ -n "$checkssh" ]; then
+				break
+			fi
+			echo "waiting sshd @ ${VMPREFIX}-1: sleep 10" && sleep 10
+		done
 		echo "checkssh connectiblity for ${VMPREFIX}-1: $checkssh"
 		if [ -z "$checkssh" ]; then
 			az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-1 --command-id RunShellScript \
@@ -690,6 +690,7 @@ case $1 in
 			exit 0
 		fi
 
+### ===========================================================================
 		# PBSノード：マウント設定
 		echo "pbsnode: nfs server @ ${VMPREFIX}-pbs"
 		mountdirectory pbs
@@ -714,7 +715,7 @@ case $1 in
 		cat ./hostsfile
 		# テンポラリファイル削除
 		rm ./tmphostsfile
-### ===========================================================================
+
 		# PBSノード：ホストファイル転送・更新
 		checkssh=$(ssh -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i "${SSHKEYDIR}" -t $USERNAME@"${pbsvmip}" "uname")
 		if [ -n "$checkssh" ]; then
