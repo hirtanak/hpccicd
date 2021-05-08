@@ -577,6 +577,8 @@ case $1 in
 		# vmlist and ipaddress 作成
 		getipaddresslist vmlist ipaddresslist
 
+		checksshconnection all
+
 		# all computenodes: basicsettings - locale, sudo, passwordless, sshd
 		basicsettings all
 
