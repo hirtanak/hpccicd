@@ -209,7 +209,10 @@ function mountdirectory () {
 		directory="/mnt/share"
 	fi
 	echo "directory: $directory"
-	if [ ! -f ./ipaddresslist ]; then echo "error!. ./ipaddresslist is not found!"; fi 
+	if [ ! -f ./ipaddresslist ]; then 
+		echo "error!. ./ipaddresslist is not found!"
+		getipaddresslist vmlist ipaddresslist nodelist
+	fi 
 	case $1 in 
 		vm1 )
 			# コマンド実行判断
@@ -625,6 +628,7 @@ case $1 in
 						--scripts "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
 				fi
 			fi
+			rm ./checkfstab
 		fi
 
 		echo "setting up nfs server"
@@ -1052,6 +1056,7 @@ case $1 in
 				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${pbsvmip}" --command-id RunShellScript --scripts "sudo sed -i -e '$ a /dev/sdc1    /mnt/share' /etc/fstab"
 			fi
 		fi
+		rm ./checkfstabpbs
 
 		# PBSノード：ディレクトリ設定
 		echo "pbsnode: data directory setting"
