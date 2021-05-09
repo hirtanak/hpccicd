@@ -324,6 +324,7 @@ function checksshconnection () {
 					echo "waiting ssh connection @ ${VMPREFIX}-${count}: sleep 5" && sleep 5
 				done
 			done
+			rm ./checksshtmp
 		;;
 	esac
 }
@@ -934,6 +935,7 @@ case $1 in
 		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo cp /home/$USERNAME/.ssh/authorized_keys /root/.ssh/authorized_keys"
 		# ジョブスケジューラセッティング
 		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" root@"${pbsvmip}" -t -t "bash /home/$USERNAME/setuppbs.sh"
+		rm ./setuppbs.sh
 	;;
 #### ==========================================================================
 #### ==========================================================================
@@ -1354,6 +1356,7 @@ EOL
 		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo cp /home/$USERNAME/.ssh/authorized_keys /root/.ssh/authorized_keys"
 		# ジョブスケジューラセッティング
 		ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" root@"${pbsvmip}" -t -t "bash /home/$USERNAME/setuppbs.sh"
+		rm ./setuppbs.sh
 ### ===========================================================================
 		# 追加機能：PBSノードにnodelistを転送する
 		scp -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" ./nodelist $USERNAME@"${pbsvmip}":/home/$USERNAME/
@@ -2002,6 +2005,12 @@ EOL
 	ssh )
 		# SSHアクセスする
 		if [ ! -f ./ipaddresslist ]; then 
+			getipaddresslist vmlist ipaddresslist
+		fi
+		vm1ip=$(az vm show -d -g $MyResourceGroup --name "${VMPREFIX}"-1 --query publicIps -o tsv)
+		vm1ipexist=$(sed -n 1P ./ipaddresslist)
+		if [ "${vm1ip}" != "${vm1ipexist}" ]; then
+			rm ./vmlist ./ipaddresslist
 			getipaddresslist vmlist ipaddresslist
 		fi
 		case ${2} in
