@@ -213,7 +213,7 @@ function mountdirectory () {
 		echo "error!. ./ipaddresslist is not found!"
 		getipaddresslist vmlist ipaddresslist nodelist
 	fi 
-	case $1 in 
+	case $1 in
 		vm1 )
 			# コマンド実行判断
 			vm1ip=$(az vm show -d -g $MyResourceGroup --name ${VMPREFIX}-1 --query publicIps -o tsv)
@@ -266,7 +266,7 @@ function mountdirectory () {
 				else
 					checkssh=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" -t "$USERNAME"@"${pbsvmip}" "uname")
 					echo "getting ssh connection. sleep 2" && sleep 2
-				fi	
+				fi
 			done
 			if [ -n "$checkssh" ]; then
 				echo "pbsnode: mount setting by ssh"
@@ -994,7 +994,7 @@ case $1 in
 		echo "diskformat: $diskformat"
 		# リモートの /dev/sdc が存在する
 		diskformat2=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo ls /dev/sdc")
-		echo "diskformat2: $diskformat2"		
+		echo "diskformat2: $diskformat2"
 		if [ -n "$diskformat2" ]; then
 			# かつ、 /dev/sdc1 が存在しない場合のみ実施
 			diskformat3=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo ls /dev/sdc1")
@@ -1003,7 +1003,7 @@ case $1 in
 				# リモートの /dev/sdc が未フォーマットであるか
 				disktype1=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo fdisk -l /dev/sdc | grep 'Disk label type'")
 				disktype2=$(ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo fdisk -l /dev/sdc | grep 'Disk identifier'")
-				# どちらも存在しない場合、フォーマット処理	
+				# どちらも存在しない場合、フォーマット処理
 				if [[ -z "$disktype1" ]] || [[ -z "$disktype2" ]] ; then 
 					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo parted /dev/sdc --script mklabel gpt mkpart xfspart xfs 0% 100%"
 					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${pbsvmip}" -t -t "sudo mkfs.xfs /dev/sdc1"
@@ -1148,7 +1148,7 @@ case $1 in
 		# テンポラリファイル削除
 		rm ./tmphostsfile
 		rm ./tmphostsfile2
-		
+
 		# PBSノード：OpenPBSサーババイナリコピー＆インストール
 		echo "copy openpbs-server-20.0.1-0.x86_64.rpm"
 		scp -o StrictHostKeyChecking=no -o 'ConnectTimeout 30' -i "${SSHKEYDIR}" ./openpbs-server-20.0.1-0.x86_64.rpm $USERNAME@"${pbsvmip}":/home/$USERNAME/
@@ -1431,7 +1431,7 @@ EOL
 			# PBSノードのOSディスクが存在しなければPBSノードも存在しない
 			echo "no PBS node here!"
 		fi
-	
+
 		# VM1-N: OSディスクタイプ変更: Premium_LRS
 		azure_sku2="Premium_LRS"
 		if [ ! -f ./tmposdiskidlist ]; then rm ./tmposdiskidlist; fi
@@ -1478,7 +1478,7 @@ EOL
 
 		# VM1 $2 マウント
 		echo "vm1: nfs server @ ${VMPREFIX}-1"
-		mountdirectory vm1 
+		mountdirectory vm1
 
 		echo "end of starting up computing nodes"
 		# PBSノードがなければ終了
@@ -1507,7 +1507,7 @@ EOL
 			# PBSノードのOSディスクが存在しなければPBSノードも存在しない
 			echo "no PBS node here!"
 		fi
-	
+
 		# VM1-N: OSディスクタイプ変更: Premium_LRS
 		azure_sku2="Premium_LRS"
 		disktmp=$(az vm show -g $MyResourceGroup --name "${VMPREFIX}"-"${2}" --query storageProfile.osDisk.managedDisk.id -o tsv)
@@ -1525,11 +1525,11 @@ EOL
 		echo "creating ipaddresslist"
 		getipaddresslist vmlist ipaddresslist
 		echo "show new vm ip"
-		sed -n "${2}"P ./ipaddresslist 
+		sed -n "${2}"P ./ipaddresslist
 
 		# VM1 $2 マウント
 		echo "${VMPREFIX}-${2}: mounting vm1 nfs server...."
-		mountdirectory vm1 
+		mountdirectory vm1
 
 		# PBSノードがなければ終了
 		if [ -z "$osdiskidpbs" ]; then
@@ -1714,7 +1714,7 @@ EOL
 		echo "deleting login node"
 		az vm delete -g $MyResourceGroup --name "${VMPREFIX}"-login --yes &
 		# vmlistがある前提
-		if [ ! -f "./vmlist" ]; then 
+		if [ ! -f "./vmlist" ]; then
 			numvm=$(cat ./vmlist | wc -l)
 		else
 			numvm=$((MAXVM))
@@ -1833,7 +1833,7 @@ EOL
 		if [ -f ./nodelist ]; then rm ./nodelist; fi
 		echo "creating vmlist and ipaddresslist and nodelist"
 		getipaddresslist vmlist ipaddresslist nodelist
-		
+
 		# pingponglist ファイルチェック・削除
 		if [ -f ./pingponglist ]; then rm ./pingponglist; fi
 		# pingponglist 作成：全ノードの組み合わせ作成
@@ -2004,7 +2004,7 @@ EOL
 	;;
 	ssh )
 		# SSHアクセスする
-		if [ ! -f ./ipaddresslist ]; then 
+		if [ ! -f ./ipaddresslist ]; then
 			getipaddresslist vmlist ipaddresslist
 		fi
 		vm1ip=$(az vm show -d -g $MyResourceGroup --name "${VMPREFIX}"-1 --query publicIps -o tsv)
