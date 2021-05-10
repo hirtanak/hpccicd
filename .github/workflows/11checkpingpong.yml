@@ -66,8 +66,8 @@ jobs:
         uses: peter-evans/create-or-update-project-card@v1
         with:
           project-name: project01
-          column-name: checlperformance
-          issue-number: ${{ steps.set_outputs_cardid.outputs.issue-number }}
+          column-name: checkperformance
+          issue-number: ${{ steps.set_outputs_cardid.outputs.issue_number }}
 
   pingpong:
     runs-on: ubuntu-latest
