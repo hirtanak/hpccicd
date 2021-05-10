@@ -30,7 +30,7 @@ jobs:
       with:
         title: AzureDeployment - ${{ steps.date.outputs.date }}
         assignees: "hirtanak"
-        labels: "azuredeploytest"
+        labels: "azurewf01"
         project: 1 # project01, number is 1
         column: "In progress"
         milestone: 1
@@ -84,8 +84,6 @@ jobs:
           echo "RG: ${MyResourceGroup}"
           echo "VMPREFIX: ${VMPREFIX}"
 
-          exit 0
-
           # check environment
           uname -a
           cat /etc/debian_version
@@ -107,8 +105,6 @@ jobs:
         run: |
           # 設定ファイル変更反映
           bash ./setupcreds.sh hpcbmtenv.sh
-
-          exit 0
 
           # SSH秘密鍵の設定
           echo "setting ssh private key...."
