@@ -179,8 +179,6 @@ jobs:
   add_label:
     runs-on: ubuntu-latest
     needs: [checkcontext]
-    outputs:
-      status_cardid ${{ steps.set_outputs_cardid.outputs.status_cardid }}
     steps:
       - uses: actions/checkout@master
       - name: Download artifact pass_status_pingpong
