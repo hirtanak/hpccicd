@@ -206,9 +206,9 @@ jobs:
           labels: |
             azuredeploytest
             01done
-          repo: github.event.issue.number = ${{ steps.set_outputs_cardid.outputs.status_cardid }}
+          # repo: github.event.issue.number = ${{ steps.set_outputs_cardid.outputs.status_cardid }}
           number: ${{ steps.set_outputs_cardid.outputs.status_cardid }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   setup_failure:
     name: setup_failure
