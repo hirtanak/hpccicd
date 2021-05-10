@@ -398,7 +398,7 @@ jobs:
         run: |
           echo "cat ./status_cardid.txt"
           echo "::set-output name=status_cardid::$(<status_cardid.txt)"
-          echo "::set-output name=issue_number::$(<status_cardid.txt)"
+          echo "::set-output name=issue-number::$(<status_cardid.txt)"
 
       - name: Create or Update Project Card
         uses: peter-evans/create-or-update-project-card@v1
