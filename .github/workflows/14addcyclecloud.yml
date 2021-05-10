@@ -177,16 +177,36 @@ jobs:
     needs: [success]
     steps:
       - uses: actions/checkout@master
-      - name: Download artifact pass_status_cardid
-        uses: actions/download-artifact@v1
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
         with:
+          # Optional, GitHub token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Required, workflow file name or ID
+          workflow: 01azure_deploy.yml
+          # Optional, the status or conclusion of a completed workflow to search for
+          # Can be one of a workflow conclusion::
+          # "failure", "success", "neutral", "cancelled", "skipped", "timed_out", "action_required"
+          # Or a workflow status:
+          # "completed", "in_progress", "queued"
+          # Default: "completed,success"
+          ###workflow_conclusion: success
+          # Optional, will use specified workflow run
+          #run_id: 1122334455
+          # Optional, run number from the workflow
+          #run_number: 34
           name: pass_status_cardid
-          path: status_cardid.txt
+          # Optional, directory where to extract artifact
+          #path: status_cardid.txt
 
-      - name: Set the statuses of cardid as output parameters
+      - name: Set the statuses of status_cardid as output parameters
         id: set_outputs_cardid
         run: |
+          ls -la ./
+          ls -la ./pass_status_cardid/
+          echo "cat ./pass_status_cardid/status_cardid.txt"
           echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
+          echo "::set-output name=issue_number::$(<pass_status_cardid/status_cardid.txt)"
 
       - name: Add label
         uses: actions-ecosystem/action-add-labels@v1
