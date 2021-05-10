@@ -183,6 +183,8 @@ jobs:
   add_label:
     runs-on: ubuntu-latest
     needs: [checkcontext]
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@master
       - name: Download artifact pass_status_pingpong
