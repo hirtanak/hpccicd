@@ -194,8 +194,8 @@ jobs:
         id: set_outputs_cardid
         run: |
           echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
-          #echo ":set-output name=github.event.issue.number::${{ steps.set_outputs_cardid.outputs.status_cardid }}"
           echo "cardid: ${{ steps.set_outputs_cardid.outputs.status_cardid }}"
+          echo "::set-output name=issue_number::$(<pass_status_cardid/status_cardid.txt)"
 
       - name: Add label
         uses: actions-ecosystem/action-add-labels@v1
