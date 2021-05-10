@@ -351,6 +351,9 @@ jobs:
       - name: Set the statuses of status_cardid as output parameters
         id: set_outputs_cardid
         run: |
+          ls -la ./
+          ls -la ./pass_status_cardid/
+          echo "cat ./pass_status_cardid/status_cardid.txt"
           echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
           echo "::set-output name=issue_number::$(<pass_status_cardid/status_cardid.txt)"
 
