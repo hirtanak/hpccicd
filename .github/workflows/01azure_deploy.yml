@@ -55,6 +55,13 @@ jobs:
         name: pass_status_cardid
         path: status_cardid.txt
 
+    - name: Create or Update Project Card
+      uses: peter-evans/create-or-update-project-card@v1
+      with:
+        project-name: project01
+        column-name: deploying
+        issue-number: ${{ steps.set_outputs_cardid.outputs.issue-number }}
+
   azure_deploy:
     runs-on: ubuntu-latest
     needs: issue_generate
@@ -77,6 +84,8 @@ jobs:
           echo "RG: ${MyResourceGroup}"
           echo "VMPREFIX: ${VMPREFIX}"
 
+          exit 0
+
           # check environment
           uname -a
           cat /etc/debian_version
@@ -98,6 +107,8 @@ jobs:
         run: |
           # 設定ファイル変更反映
           bash ./setupcreds.sh hpcbmtenv.sh
+
+          exit 0
 
           # SSH秘密鍵の設定
           echo "setting ssh private key...."
@@ -200,6 +211,12 @@ jobs:
             01azure_done
           number: ${{ steps.set_outputs_cardid.outputs.status_cardid }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      #- uses: alex-page/github-project-automation-plus@v0.7.1
+      #  with:
+      #    project: project01
+      #    column: deploying
+      #    repo-token: ${{ secrets.GITHUB_TOKEN }}
 
   setup_failure:
     name: setup_failure
