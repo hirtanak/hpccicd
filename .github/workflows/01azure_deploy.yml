@@ -41,21 +41,21 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create file status_cardid.txt and write the cardid status into it
-        id: set_outputs_cardid
-        if: always()
-        run: |
-          # ::set-output name=issue-number::316
-          # echo "::set-output name=status_pingpong::$(<pass_status_pingpong/status_pingpong.txt)"
-          # echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
-          echo ${{ status_cardid }} > status_cardid.txt
+    - name: Create file status_cardid.txt and write the cardid status into it
+      id: set_outputs_cardid
+      if: always()
+      run: |
+        # ::set-output name=issue-number::316
+        # echo "::set-output name=status_pingpong::$(<pass_status_pingpong/status_pingpong.txt)"
+        # echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
+        echo ${{ status_cardid }} > status_cardid.txt
 
-      - name: Upload file status_cardid.txt as an artifact
-        if: always()
-        uses: actions/upload-artifact@v1
-        with:
-          name: pass_status_cardid
-          path: status_cardid.txt
+    - name: Upload file status_cardid.txt as an artifact
+      if: always()
+      uses: actions/upload-artifact@v1
+      with:
+        name: pass_status_cardid
+        path: status_cardid.txt
 
   azure_deploy:
     runs-on: ubuntu-latest
