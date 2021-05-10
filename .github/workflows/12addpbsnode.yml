@@ -346,7 +346,7 @@ jobs:
           #run_number: 34
           name: pass_status_cardid
           # Optional, directory where to extract artifact
-          path: status_cardid.txt
+          #path: status_cardid.txt
 
       - name: Set the statuses of status_cardid as output parameters
         id: set_outputs_cardid
