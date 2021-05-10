@@ -406,5 +406,5 @@ jobs:
         uses: peter-evans/create-or-update-project-card@v1
         with:
           project-name: project01
-          column-name: Review in progress
+          column-name: 'Review in progress'
           issue-number: ${{ steps.set_outputs_cardid3.outputs.issue-number }}
