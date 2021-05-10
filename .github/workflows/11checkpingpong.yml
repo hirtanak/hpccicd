@@ -372,10 +372,10 @@ jobs:
     needs: success
     steps:
       - name: Create file status_cardid.txt and write the cardid status into it
-        id: set_outputs_cardid
+        id: set_outputs_cardid2
         if: always()
         run: |
-          echo ${{ steps.set_outputs_cardid.outputs.issue-number }} > status_cardid.txt
+          echo ${{ steps.set_outputs_cardid2.outputs.issue-number }} > status_cardid.txt
 
       - name: Upload file status_cardid.txt as an artifact
         if: always()
@@ -389,4 +389,4 @@ jobs:
         with:
           project-name: project01
           column-name: Review in progress
-          issue-number: ${{ steps.set_outputs_cardid.outputs.issue-number }}
+          issue-number: ${{ steps.set_outputs_cardid2.outputs.issue-number }}
