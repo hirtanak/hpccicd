@@ -46,7 +46,7 @@ jobs:
       id: set_outputs_cardid2
       if: always()
       run: |
-        uname
+        echo $issue-number > status_cardid.txt
 
     - name: Upload file status_cardid.txt as an artifact
       if: always()
