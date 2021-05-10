@@ -85,7 +85,7 @@ for count in 1 10; do
 	if [ -n "$checkssh" ]; then
 		break
 	fi
-	echo "${count}: sleep 2" && sleep 2
+	echo "${count}: sleep 4" && sleep 4
 done
 if [ -z "$checkssh" ]; then
 	echo "can not access Azure CycleCloud by ssh"

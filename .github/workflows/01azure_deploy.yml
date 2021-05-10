@@ -46,7 +46,6 @@ jobs:
       id: set_outputs_cardid2
       if: always()
       run: |
-        # echo $issue-number > status_cardid.txt
         echo ${{ steps.set_outputs_cardid.outputs.issue-number }} > status_cardid.txt
 
     - name: Upload file status_cardid.txt as an artifact
@@ -77,7 +76,9 @@ jobs:
         run: |
           echo "RG: ${MyResourceGroup}"
           echo "VMPREFIX: ${VMPREFIX}"
-  
+
+          exit 0
+
           # check environment
           uname -a
           cat /etc/debian_version
@@ -99,6 +100,8 @@ jobs:
         run: |
           # 設定ファイル変更反映
           bash ./setupcreds.sh hpcbmtenv.sh
+
+          exit 0
 
           # SSH秘密鍵の設定
           echo "setting ssh private key...."
@@ -193,7 +196,7 @@ jobs:
           echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
 
       - uses: actions-ecosystem/action-add-labels@v1
-        if: ${{ startsWith(github.event.comment.body, '/add-labels') }}
+        #if: ${{ startsWith(github.event.comment.body, '/add-labels') }}
         with:
           labels: 01done
           repo: github.event.issue.number = ${{ steps.set_outputs_cardid.outputs.status_cardid }}
