@@ -36,6 +36,8 @@ jobs:
           echo "RG: ${MyResourceGroup}"
           echo "VMPREFIX: ${VMPREFIX}"
 
+          exit 0
+
           # check environment
           uname -a
           cat /etc/debian_version
@@ -115,6 +117,8 @@ jobs:
         run: |
           echo "RG: ${MyResourceGroup}"
           echo "VMPREFIX: ${VMPREFIX}"
+
+          exit 0
 
           # check environment
           uname -a
@@ -313,6 +317,28 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: pass_status_cardid
+          path: status_cardid.txt
+
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          # Optional, GitHub token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Required, workflow file name or ID
+          workflow: 01azure_deploy.yml
+          # Optional, the status or conclusion of a completed workflow to search for
+          # Can be one of a workflow conclusion::
+          # "failure", "success", "neutral", "cancelled", "skipped", "timed_out", "action_required"
+          # Or a workflow status:
+          # "completed", "in_progress", "queued"
+          # Default: "completed,success"
+          workflow_conclusion: success
+          # Optional, will use specified workflow run
+          #run_id: 1122334455
+          # Optional, run number from the workflow
+          #run_number: 34
+          name: pass_status_cardid
+          # Optional, directory where to extract artifact
           path: status_cardid.txt
 
       - name: Set the statuses of pingpong as output parameters

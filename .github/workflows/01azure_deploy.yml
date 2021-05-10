@@ -204,19 +204,12 @@ jobs:
 
       - name: Add label
         uses: actions-ecosystem/action-add-labels@v1
-
         with:
           labels: |
             azurewf01
             01a_done
           number: ${{ steps.set_outputs_cardid.outputs.status_cardid }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      #- uses: alex-page/github-project-automation-plus@v0.7.1
-      #  with:
-      #    project: project01
-      #    column: deploying
-      #    repo-token: ${{ secrets.GITHUB_TOKEN }}
 
   setup_failure:
     name: setup_failure
