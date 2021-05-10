@@ -14,8 +14,7 @@ jobs:
     # on.push.paths と on.push.branch の && は利用できないため回避策
     if: github.ref == 'refs/heads/main'
     outputs:
-      cardid: ${{ steps.cardid.outputs.cardid }}
-      issue-number: ${{ steps.cardid.outputs.issue.number }}
+      status_cardid: ${{ steps.set_outputs_cardid.outputs.status_cardid }}
     steps:
     # Repo code checkout required if `template` is used
     - name: Checkout
@@ -26,7 +25,6 @@ jobs:
       run: echo "::set-output name=date::$(date +'%Y/%m/%d-%H:%m')"
     # 作成された issue をプロジェクトに自動登録
     - name: Creating new deployment project card
-      id: cardid
       uses: imjohnbo/issue-bot@v3.3.0
       with:
         title: AzureDeployment - ${{ steps.date.outputs.date }}
@@ -42,11 +40,22 @@ jobs:
         # template: ".github/ISSUE_TEMPLATE/generate_issuelist.md"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: get issue id
-      run: |
-        echo ${{ steps.cardid.outputs.cardid }}
-        echo ${{ github.event.issue.number }}
-        echo ${{ steps.cardid.outputs.issue.number }}
+
+      - name: Create file status_cardid.txt and write the cardid status into it
+        id: set_outputs_cardid
+        if: always()
+        run: |
+          # ::set-output name=issue-number::316
+          # echo "::set-output name=status_pingpong::$(<pass_status_pingpong/status_pingpong.txt)"
+          # echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
+          echo ${{ status_cardid }} > status_cardid.txt
+
+      - name: Upload file status_cardid.txt as an artifact
+        if: always()
+        uses: actions/upload-artifact@v1
+        with:
+          name: pass_status_cardid
+          path: status_cardid.txt
 
   azure_deploy:
     runs-on: ubuntu-latest
@@ -172,13 +181,25 @@ jobs:
   add_label:
     runs-on: ubuntu-latest
     needs: [checkcontext]
+    outputs:
+      status_cardid ${{ steps.set_outputs_cardid.outputs.status_cardid }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@master
+      - name: Download artifact pass_status_pingpong
+        uses: actions/download-artifact@v1
+        with:
+          name: pass_status_cardid
+
+      - name: Set the statuses of pingpong as output parameters
+        id: set_outputs_cardid
+        run: |
+          echo "::set-output name=status_cardid::$(<pass_status_pingpong/status_cardid.txt)"
+
       - uses: actions-ecosystem/action-add-labels@v1
         if: ${{ startsWith(github.event.comment.body, '/add-labels') }}
         with:
           labels: 01done
-          repo: github.event.issue.number = ${{ steps.cardid.outputs.issue.number }}
+          repo: github.event.issue.number = ${{ steps.set_outputs_cardid.outputs.status_cardid }}
 
   setup_failure:
     name: setup_failure
