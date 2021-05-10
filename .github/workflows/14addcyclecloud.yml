@@ -207,8 +207,8 @@ jobs:
         id: set_outputs_cardid
         run: |
           echo "cat ./pass_status_cardid/status_cardid.txt"
-          echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
-          echo "::set-output name=issue_number::$(<pass_status_cardid/status_cardid.txt)"
+          echo "::set-output name=status_cardid::$(<status_cardid.txt)"
+          echo "::set-output name=issue_number::$(<status_cardid.txt)"
 
       - name: Add label
         uses: actions-ecosystem/action-add-labels@v1

@@ -46,28 +46,28 @@ jobs:
         id: set_outputs_cardid
         run: |
           echo "cat ./status_cardid.txt"
-          echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
-          echo "::set-output name=issue_number::$(<pass_status_cardid/status_cardid.txt)"
+          echo "::set-output name=status_cardid::$(<status_cardid.txt)"
+          echo "::set-output name=issue_number::$(<status_cardid.txt)"
 
-      - name: Create file status_cardid.txt and write the cardid status into it
-        id: set_outputs_cardid2
-        if: always()
-        run: |
-          echo ${{ steps.set_outputs_cardid2.outputs.issue-number }} > status_cardid.txt
+      #- name: Create file status_cardid.txt and write the cardid status into it
+      #  id: set_outputs_cardid2
+      #  if: always()
+      #  run: |
+      #    echo ${{ steps.set_outputs_cardid.outputs.issue-number }} > status_cardid.txt
 
-      - name: Upload file status_cardid.txt as an artifact
-        if: always()
-        uses: actions/upload-artifact@v1
-        with:
-          name: pass_status_cardid
-          #path: status_cardid.txt
+      #- name: Upload file status_cardid.txt as an artifact
+      #  if: always()
+      #  uses: actions/upload-artifact@v1
+      #  with:
+      #    name: pass_status_cardid
+      #    path: status_cardid.txt
 
       - name: Create or Update Project Card
         uses: peter-evans/create-or-update-project-card@v1
         with:
           project-name: project01
           column-name: checlperformance
-          issue-number: ${{ steps.set_outputs_cardid2.outputs.issue-number }}
+          issue-number: ${{ steps.set_outputs_cardid.outputs.issue-number }}
 
   pingpong:
     runs-on: ubuntu-latest
@@ -382,7 +382,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: pass_status_cardid
-          #path: status_cardid.txt
+          path: status_cardid.txt
 
       - name: Create or Update Project Card
         uses: peter-evans/create-or-update-project-card@v1
