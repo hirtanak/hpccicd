@@ -60,6 +60,8 @@ jobs:
           # 設定ファイル変更反映
           bash ./setupcreds.sh hpcbmtenv.sh
 
+          exit 0
+
           # SSH秘密鍵の設定
           echo "setting ssh private key...."
           echo "$SSH_SECRET_KEY" > ./${VMPREFIX}
@@ -313,6 +315,9 @@ jobs:
   add_label:
     runs-on: ubuntu-latest
     needs: [success2]
+    outputs:
+      status_cardid: ${{ steps.set_outputs_cardid.outputs.cardid }}
+      issue_number: ${{ steps.set_outputs_cardid.outputs.issue_number }}
     steps:
       - uses: actions/checkout@master
       #- name: Download artifact pass_status_cardid
@@ -343,10 +348,11 @@ jobs:
           # Optional, directory where to extract artifact
           path: status_cardid.txt
 
-      - name: Set the statuses of pingpong as output parameters
+      - name: Set the statuses of status_cardid as output parameters
         id: set_outputs_cardid
         run: |
           echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
+          echo "::set-output name=issue_number::$(<pass_status_cardid/status_cardid.txt)"
 
       - name: Add label
         uses: actions-ecosystem/action-add-labels@v1
