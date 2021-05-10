@@ -207,8 +207,8 @@ jobs:
 
         with:
           labels: |
-            azuredeploytest
-            01azure_done
+            azurewf01
+            01a_done
           number: ${{ steps.set_outputs_cardid.outputs.status_cardid }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

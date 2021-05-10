@@ -191,9 +191,9 @@ jobs:
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: |
-            azuredeploytest
-            01azure_done
-            02pbs_done
-            03cycle_done
+            azurewf01
+            01a_done
+            02p_done
+            03c_done
           number: ${{ steps.set_outputs_cardid.outputs.status_cardid }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
