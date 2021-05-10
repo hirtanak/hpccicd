@@ -183,8 +183,6 @@ jobs:
   add_label:
     runs-on: ubuntu-latest
     needs: [checkcontext]
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@master
       - name: Download artifact pass_status_pingpong
@@ -196,6 +194,7 @@ jobs:
         id: set_outputs_cardid
         run: |
           echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
+          echo ":set-output name=github.event.issue.number::${{ steps.set_outputs_cardid.outputs.status_cardid }}"
 
       - name: Add label
         uses: actions-ecosystem/action-add-labels@v1
