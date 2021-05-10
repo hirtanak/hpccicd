@@ -14,7 +14,7 @@ jobs:
     # on.push.paths と on.push.branch の && は利用できないため回避策
     if: github.ref == 'refs/heads/main'
     outputs:
-      status_cardid: ${{ steps.set_outputs_cardid.outputs.status_cardid }}
+      issue-number: ${{ steps.set_outputs_cardid.outputs.status_issue-number }}
     steps:
     # Repo code checkout required if `template` is used
     - name: Checkout
@@ -25,6 +25,7 @@ jobs:
       run: echo "::set-output name=date::$(date +'%Y/%m/%d-%H:%m')"
     # 作成された issue をプロジェクトに自動登録
     - name: Creating new deployment project card
+      id: set_outputs_cardid
       uses: imjohnbo/issue-bot@v3.3.0
       with:
         title: AzureDeployment - ${{ steps.date.outputs.date }}
@@ -42,14 +43,15 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Create file status_cardid.txt and write the cardid status into it
-      id: set_outputs_cardid
+      id: set_outputs_cardid2
       if: always()
       run: |
         # ::set-output name=issue-number::316
         # echo "::set-output name=status_pingpong::$(<pass_status_pingpong/status_pingpong.txt)"
         # echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
         #echo ${{ issue-number }} > status_cardid.txt
-        echo ${{ steps.set_outputs_cardid.outputs.status_cardid }} > status_cardid.txt
+        #echo ${{ steps.set_outputs_cardid.outputs.status_cardid }} > status_cardid.txt
+        uname
 
     - name: Upload file status_cardid.txt as an artifact
       if: always()
