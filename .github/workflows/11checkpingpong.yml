@@ -341,7 +341,6 @@ jobs:
       status_pongpong: ${{ steps.set_outputs_pingpong.outputs.status_pingpong }}
     steps:
       - uses: actions/checkout@master
-
       - name: Download artifact pass_status_pingpong
         uses: actions/download-artifact@v1
         with:
@@ -371,7 +370,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: success
     steps:
-
       - uses: actions/checkout@master
       - name: Download artifact
         uses: dawidd6/action-download-artifact@v2
@@ -407,4 +405,4 @@ jobs:
         with:
           project-name: project01
           column-name: 'Review in progress'
-          issue-number: ${{ steps.set_outputs_cardid3.outputs.issue-number }}
+          issue-number: ${{ steps.set_outputs_cardid.outputs.issue-number }}
