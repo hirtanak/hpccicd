@@ -14,7 +14,7 @@ jobs:
     # on.push.paths と on.push.branch の && は利用できないため回避策
     if: github.ref == 'refs/heads/main'
     outputs:
-      issue-number: ${{ steps.set_outputs_cardid.outputs.status_issue-number }}
+      issue-number: ${{ steps.set_outputs_cardid.outputs.issue-number }}
     steps:
     # Repo code checkout required if `template` is used
     - name: Checkout
@@ -46,11 +46,6 @@ jobs:
       id: set_outputs_cardid2
       if: always()
       run: |
-        # ::set-output name=issue-number::316
-        # echo "::set-output name=status_pingpong::$(<pass_status_pingpong/status_pingpong.txt)"
-        # echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
-        #echo ${{ issue-number }} > status_cardid.txt
-        #echo ${{ steps.set_outputs_cardid.outputs.status_cardid }} > status_cardid.txt
         uname
 
     - name: Upload file status_cardid.txt as an artifact
