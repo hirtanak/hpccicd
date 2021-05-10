@@ -105,7 +105,7 @@ jobs:
         with:
           title: Check MPI pingpong - ${{ steps.date.outputs.date }}
           assignees: "hirtanak"
-          labels: "azuredeploytest"
+          labels: "azurewf01"
           project: 1 # project01, number is 1
           column: "checkperformance"
           milestone: 1
