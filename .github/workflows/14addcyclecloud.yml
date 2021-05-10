@@ -194,5 +194,6 @@ jobs:
             azuredeploytest
             01azure_done
             02pbs_done
+            03cycle_done
           number: ${{ steps.set_outputs_cardid.outputs.status_cardid }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
