@@ -315,11 +315,11 @@ jobs:
     needs: [success2]
     steps:
       - uses: actions/checkout@master
-      - name: Download artifact pass_status_cardid
-        uses: actions/download-artifact@v1
-        with:
-          name: pass_status_cardid
-          path: status_cardid.txt
+      #- name: Download artifact pass_status_cardid
+        #uses: actions/download-artifact@v1
+        #with:
+        #  name: pass_status_cardid
+        #  path: status_cardid.txt
 
       - name: Download artifact
         uses: dawidd6/action-download-artifact@v2
