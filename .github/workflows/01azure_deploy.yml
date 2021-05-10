@@ -48,7 +48,8 @@ jobs:
         # ::set-output name=issue-number::316
         # echo "::set-output name=status_pingpong::$(<pass_status_pingpong/status_pingpong.txt)"
         # echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
-        echo ${{ issue-number }} > status_cardid.txt
+        #echo ${{ issue-number }} > status_cardid.txt
+        echo ${{ steps.set_outputs_cardid.outputs.status_cardid }} > status_cardid.txt
 
     - name: Upload file status_cardid.txt as an artifact
       if: always()
