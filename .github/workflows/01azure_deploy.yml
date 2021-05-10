@@ -198,13 +198,12 @@ jobs:
 
       - name: Add label
         uses: actions-ecosystem/action-add-labels@v1
-        if: ${{ startsWith(github.event.comment.body, '/add-labels') }}
+        #if: ${{ startsWith(github.event.comment.body, '/add-labels') }}
         with:
           labels: |
             azuredeploytest
             01done
           repo: github.event.issue.number = ${{ steps.set_outputs_cardid.outputs.status_cardid }}
-        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   setup_failure:
