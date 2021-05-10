@@ -46,7 +46,8 @@ jobs:
       id: set_outputs_cardid2
       if: always()
       run: |
-        echo $issue-number > status_cardid.txt
+        # echo $issue-number > status_cardid.txt
+        echo ${{ steps.set_outputs_cardid.outputs.issue-number }} > status_cardid.txt
 
     - name: Upload file status_cardid.txt as an artifact
       if: always()
