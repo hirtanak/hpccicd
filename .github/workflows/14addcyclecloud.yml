@@ -171,3 +171,28 @@ jobs:
           job: ${{ toJson(job) }}
           steps: ${{ toJson(steps) }}        
           dry_run: False
+
+  add_label:
+    runs-on: ubuntu-latest
+    needs: [success]
+    steps:
+      - uses: actions/checkout@master
+      - name: Download artifact pass_status_pingpong
+        uses: actions/download-artifact@v1
+        with:
+          name: pass_status_cardid
+
+      - name: Set the statuses of pingpong as output parameters
+        id: set_outputs_cardid
+        run: |
+          echo "::set-output name=status_cardid::$(<pass_status_cardid/status_cardid.txt)"
+
+      - name: Add label
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            azuredeploytest
+            01azure_done
+            02pbs_done
+          number: ${{ steps.set_outputs_cardid.outputs.status_cardid }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
