@@ -156,23 +156,23 @@ jobs:
           path: result.txt
 
       # 作成された issue をプロジェクトに自動登録
-      - name: Creating issue on checkperformance in the project
-        uses: imjohnbo/issue-bot@v3.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          title: Check MPI pingpong - ${{ steps.date.outputs.date }}
-          assignees: "hirtanak"
-          labels: "azurewf01"
-          project: 1 # project01, number is 1
-          column: "checkperformance"
-          milestone: 1
-          body: |-
-            :wave: Hi,
-            cat ./result.txt
-          # {{#each assignees}}@{{this}}{{#unless @last}}, {{/unless}}{{/each}}!        
-          pinned: false
-          close-previous: false
+      #- name: Creating issue on checkperformance in the project
+      #  uses: imjohnbo/issue-bot@v3.3.0
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  with:
+      #    title: Check MPI pingpong - ${{ steps.date.outputs.date }}
+      #    assignees: "hirtanak"
+      #    labels: "azurewf01"
+      #    project: 1 # project01, number is 1
+      #    column: "checkperformance"
+      #    milestone: 1
+      #    body: |-
+      #      :wave: Hi,
+      #      cat ./result.txt
+      #    # {{#each assignees}}@{{this}}{{#unless @last}}, {{/unless}}{{/each}}!        
+      #    pinned: false
+      #    close-previous: false
 
       # Teamに通知
       - name: Microsoft Teams Notification
