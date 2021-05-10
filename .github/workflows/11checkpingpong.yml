@@ -364,7 +364,7 @@ jobs:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
           needs: ${{ toJson(needs) }}
           job: ${{ toJson(job) }}
-          steps: ${{ toJson(steps) }}        
+          steps: ${{ toJson(steps) }}
           dry_run: False
 
   move_card2:
