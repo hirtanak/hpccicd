@@ -39,8 +39,6 @@ jobs:
           echo "RG: ${MyResourceGroup}"
           echo "VMPREFIX: ${VMPREFIX}"
 
-          exit 0
-
           # check environment
           uname -a
           cat /etc/debian_version
@@ -64,8 +62,6 @@ jobs:
           bash ./setupcreds.sh hpcbmtenv.sh
           bash ./setupcreds.sh addcyclecloud.sh
           bash ./setupcreds.sh cyclesetting.sh
-
-          exit 0
 
           # SSH秘密鍵の設定
           echo "setting ssh private key...."
