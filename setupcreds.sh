@@ -20,7 +20,7 @@ sed -i -e "s/^PBSVMSIZE=Standard_D8as_v4/PBSVMSIZE=Standard_D4as_v4/" ./"${1}"
 sed -i -e "s/^PBSPERMANENTDISK=2048/PBSPERMANENTDISK=256/" ./"${1}"
 
 # github actionsのための設定
-#sed -i -e "s!LIMITEDIP2=113.40.3.153/32!LIMITEDIP2=Internet!" ./${1}
+sed -i -e "s!LIMITEDIP2=113.40.3.153/32!LIMITEDIP2=Internet!" ./${1}
 sed -i -e 's/^#az login/az login/' ./"${1}"
 
 
