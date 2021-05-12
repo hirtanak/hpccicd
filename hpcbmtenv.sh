@@ -324,7 +324,6 @@ function checksshconnection () {
 					echo "waiting ssh connection @ ${VMPREFIX}-${count}: sleep 5" && sleep 5
 				done
 			done
-			rm ./checksshtmp
 		;;
 	esac
 }
@@ -590,46 +589,49 @@ case $1 in
 		echo "setting fstab"
 		mountip=$(az vm show -g $MyResourceGroup --name ${VMPREFIX}-1 -d --query privateIps -otsv)
 		if [ ! -s ./checkfstab ]; then 
-			if [ -n "$checkssh" ]; then
-				echo "${VMPREFIX}-${count}: configuring fstab by ssh"
-				#ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@${line} -t -t "sudo sed -i -e '/azure_resource-part1/d' /etc/fstab"
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t 'sudo umount /dev/disk/cloud/azure_resource-part1'
-				# 重複していないかチェック
-				ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo grep ${mountip}:/mnt/resource/scratch /etc/fstab" > checkfstab
-				checkfstab=$(cat checkfstab | wc -l)
-				if [ $((checkfstab)) -ge 2 ]; then 
-					echo "deleting dupulicated settings...."
-					#ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo sed -i -e '/${mountip}:\/mnt\/resource/d' /etc/fstab"
-					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
-				elif [ $((checkfstab)) -eq 1 ]; then
-					echo "correct fstab setting"
-				elif [ $((checkfstab)) -eq 0 ]; then
-					echo "fstab missing: no /mnt/resource/scratch here!"
-					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
+			for count in $(seq 1 $MAXVM); do
+				checkssh=$(sed -n "${count}"P ./checksshtmp)
+				if [ -n "$checkssh" ]; then
+					echo "${VMPREFIX}-${count}: configuring fstab by ssh"
+					line=$(sed -n "${count}"P ./ipaddresslist)
+					#ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@${line} -t -t "sudo sed -i -e '/azure_resource-part1/d' /etc/fstab"
+					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t 'sudo umount /dev/disk/cloud/azure_resource-part1'
+					# 重複していないかチェック
+					ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo grep ${mountip}:/mnt/resource/scratch /etc/fstab" > checkfstab
+					checkfstab=$(cat checkfstab | wc -l)
+					if [ $((checkfstab)) -ge 2 ]; then 
+						echo "deleting dupulicated settings...."
+						#ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo sed -i -e '/${mountip}:\/mnt\/resource/d' /etc/fstab"
+						ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
+					elif [ $((checkfstab)) -eq 1 ]; then
+						echo "correct fstab setting"
+					elif [ $((checkfstab)) -eq 0 ]; then
+						echo "fstab missing: no /mnt/resource/scratch here!"
+						ssh -o StrictHostKeyChecking=no -i "${SSHKEYDIR}" $USERNAME@"${line}" -t -t "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
+					fi
+				else
+					# fstab 設定: az vm run-command
+					echo "${VMPREFIX}-${count}: configuring fstab by az vm run-command"
+					#az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo sed -i -e '/azure_resource-part1/d' /etc/fstab"
+					#az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts 'sudo umount /dev/disk/cloud/azure_resource-part1'
+					# 重複していないかチェック
+					az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo grep "${mountip}:/mnt/resource/scratch" /etc/fstab" > checkfstab
+					checkfstab=$(cat checkfstab | wc -l)
+					if [ $((checkfstab)) -ge 2 ]; then
+						echo "deleting dupulicated settings...."
+						az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
+							--scripts "sudo sed -i -e '/${mountip}:\/mnt\/resource/d' /etc/fstab"
+						az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
+							--scripts "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
+					elif [ $((checkfstab)) -eq 1 ]; then
+						echo "correct fstab setting"
+					elif [ $((checkfstab)) -eq 0 ]; then
+						echo "fstab missing: no /mnt/resource/scratch here!"
+						az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
+							--scripts "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
+					fi
 				fi
-			else
-				# fstab 設定: az vm run-command
-				echo "${VMPREFIX}-${count}: configuring fstab by az vm run-command"
-				#az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo sed -i -e '/azure_resource-part1/d' /etc/fstab"
-				#az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts 'sudo umount /dev/disk/cloud/azure_resource-part1'
-				# 重複していないかチェック
-				az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript --scripts "sudo grep "${mountip}:/mnt/resource/scratch" /etc/fstab" > checkfstab
-				checkfstab=$(cat checkfstab | wc -l)
-				if [ $((checkfstab)) -ge 2 ]; then
-					echo "deleting dupulicated settings...."
-					az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
-						--scripts "sudo sed -i -e '/${mountip}:\/mnt\/resource/d' /etc/fstab"
-					az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
-						--scripts "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
-				elif [ $((checkfstab)) -eq 1 ]; then
-					echo "correct fstab setting"
-				elif [ $((checkfstab)) -eq 0 ]; then
-					echo "fstab missing: no /mnt/resource/scratch here!"
-					az vm run-command invoke -g $MyResourceGroup --name ${VMPREFIX}-"${count}" --command-id RunShellScript \
-						--scripts "sudo sed -i -e '$ a ${mountip}:/mnt/resource/scratch    /mnt/resource/scratch    xfs    defaults    0    0' /etc/fstab"
-				fi
-			fi
-			rm ./checkfstab
+			done
 		fi
 
 		echo "setting up nfs server"
