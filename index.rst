@@ -36,3 +36,4 @@
    /result/result-20210510_1414.rst
    /result/result-20210512_2234.rst
    /result/result-20210520_0526.rst
+   /result/result-20210520_0625.rst
