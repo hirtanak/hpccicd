@@ -1,7 +1,7 @@
 name: 11checkpingpong
 on:
   workflow_run:
-    workflows: ["14addcyclecloud"]
+    workflows: ["01azure_deploy"]
     branches: [main]
     types: 
       - completed
